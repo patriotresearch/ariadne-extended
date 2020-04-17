@@ -1,0 +1,14 @@
+type ErrorDetail {
+  error: String
+  code: String
+}
+
+type FieldError {
+  name: String
+  values: [ErrorDetail]
+}
+
+interface Payload {
+  success: Boolean
+  errors: [FieldError]
+}

@@ -1,0 +1,33 @@
+name: Main
+
+on: [push, pull_request]
+
+jobs:
+  Tests:
+    # needs: Linting
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8]
+        django-version: [2.2.*, 3.0.*]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install
+      uses: abatilo/actions-poetry@v1.5.0
+      with:
+        python_version: ${{ matrix.python-version }}
+        # poetry_version: 0.12.17
+        args: install
+    - name: Install Django version
+      uses: abatilo/actions-poetry@v1.5.0
+      with:
+        python_version: ${{ matrix.python-version }}
+        # poetry_version: 0.12.17
+        args: add -n django@${{ matrix.django-version }}
+    - name: Test
+      uses: abatilo/actions-poetry@v1.5.0
+      with:
+        python_version: ${{ matrix.python-version }}
+        # poetry_version: 0.12.17
+        args: run python -m pytest tests/

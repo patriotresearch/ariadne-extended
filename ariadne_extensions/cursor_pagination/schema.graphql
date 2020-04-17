@@ -1,0 +1,19 @@
+# Relay pagination types
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+  count: Int
+}
+
+# TODO: node type object field?
+interface Connection {
+  pageInfo: PageInfo
+}
+
+interface Node {
+  id: ID!
+}
+
