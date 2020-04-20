@@ -4,17 +4,15 @@ Ariadne comes with a few contrib modules to support integration with django. Thi
 
 It copies and follows some of the conventions defined in Django Rest Framework, effort will be made to provide API compatibility with certain DRF extension modules that are relevant.
 
+The overall goal is to provide often re-used modules and GrpahQL schema, so one doesn't have to re-create them per project.
+
 ## Supported DRF modules
 
 * Pagination classes
 * Permissions classes
-* Serializer classes? ( may not be needed )
+* Serializer classes ( may not removed and made generic )
 * Throttling
-* Django filters
-
-## First: How to break work that has been already done into their areas of concern
-
-Goal make re-usable modules and schema, so one doesn't have to include everything.
+* django-filters filter backend
 
 ### `ariadne_extensions.graph`
 
@@ -34,8 +32,18 @@ Rename to relay_pagination maybe?
 
 Contains the `PageInfo` graphql type and `Connection` interface for utilizing cursor based pagination.
 
-TODO: Should we provide a input type for cursor pagination instead of just copying pagination args info paginatable list fields??
+TODO: Should we provide a input type for cursor pagination instead of just copying pagination args info paginate-able list fields??
+
+### `ariadne_extensions.filters`
+Filter backend interface to pass filter arguments to django-filter
+
+### `ariadne_extensions.resolvers`
+ABC for Class Based Resolvers and model resolvers that utilize DRF serializers for saving data. This is likely to change in the future.
+
+### `ariadne_extensions.uuid`
+DRF UUID field scalar for use with models that may use a UUID as their primary key, or other UUID fields.
 
 - [ ] Get rid of dependency on DRF
 - [ ] Investigate the need for a serializer ( nested data reliance? )
-- [ ] Organize code into multiple django apps to select desired componentry
+- [x] Organize code into multiple django apps to select desired componentry
+- [ ] Documentation and examples

@@ -109,9 +109,7 @@ class Resolver(abc.ABC):
         """
         If request is not permitted, determine what kind of exception to raise.
         """
-        if request.authenticators and not request.successful_authenticator:
-            raise exceptions.NotAuthenticated()
-        raise exceptions.PermissionDenied(detail=message)
+        raise exceptions.PermissionDenied(message)
 
     def check_object_permissions(self, request, obj):
         """
