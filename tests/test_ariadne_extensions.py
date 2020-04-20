@@ -1,4 +1,4 @@
-from ariadne_extensions import __version__
+from ariadne_extended import __version__
 
 
 def test_version():

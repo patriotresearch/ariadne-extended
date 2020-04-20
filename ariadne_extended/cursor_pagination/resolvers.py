@@ -1,4 +1,4 @@
-from ariadne_extensions.resolvers.model import ModelResolver
+from ariadne_extended.resolvers.model import ModelResolver
 
 from .mixins import RelayModelMixin
 from ariadne import FallbackResolversSetter

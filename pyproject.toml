@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ariadne-extensions"
+name = "ariadne-extended"
 version = "0.1.0"
 description = ""
 authors = ["Patrick Forringer <pforringer@patriotrc.com>", "Buddy Lindsey <blindsey@patriotrc.com"]
@@ -27,7 +27,7 @@ line-length = 99
 exclude = '''
 (
   /(
-    | \.git          # root of the project
+    | \.git
     | \.mypy_cache
     | \.tox
     | \.venv
@@ -37,7 +37,6 @@ exclude = '''
     | dist
     | migrations
   )/
-                     # the root of the project
 )
 '''
 

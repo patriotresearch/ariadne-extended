@@ -14,7 +14,7 @@ class GraphLoaderConfig(AppConfig):
     Graph loader finds all the schemas, resolvers and type definitions
     """
 
-    name = "ariadne_extensions.graph_loader"
+    name = "ariadne_extended.graph_loader"
 
     def ready(self):
         # Find all schema.graphql and resolver modules and load them
