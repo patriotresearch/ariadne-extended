@@ -26,7 +26,7 @@ classifiers = [
 "Documentation" = "https://ariadne-extended.readthedocs.io"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 ariadne = "^0.11.0"
 pyhumps = "^1.3.1"
 django = {version = ">=2.2, <3.1"}
