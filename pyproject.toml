@@ -7,9 +7,6 @@ license = "MIT"
 readme = "README.rst"
 keywords = ["ariadne-extended"]
 repository = "https://github.com/patriotresearch/ariadne-extended"
-packages = [
-    { include = "ariadne_extended", from = "src" },
-]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Developers",
