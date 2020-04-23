@@ -19,3 +19,6 @@ max_line_length = 99
 
 [LICENSE.md]
 insert_final_newline = false
+
+[*.yml]
+tab_width = 2
