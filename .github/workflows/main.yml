@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
         django-version: [2.2.*, 3.0.*]
 
     steps:
@@ -37,7 +37,7 @@ jobs:
       run: poetry install
 
     - name: Install Django ${{ matrix.django-version }}
-      run: poetry shell & pip install django@${{ matrix.django-version }}
+      run: poetry run pip install django==${{ matrix.django-version }}
 
     - name: Test
       run: poetry run pytest
