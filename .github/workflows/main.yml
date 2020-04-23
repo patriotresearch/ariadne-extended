@@ -13,21 +13,31 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Install
-      uses: abatilo/actions-poetry@v1.5.0
+
+    - name: "Install Python ${{ matrix.python-version }}"
+      uses: actions/setup-python@v1
       with:
-        python_version: ${{ matrix.python-version }}
-        poetry_version: 1.0.5
-        args: install
-    - name: Install Django version
-      uses: abatilo/actions-poetry@v1.5.0
+        python-version: ${{ matrix.python-version }}
+
+    - name: "Install Poetry"
+    - uses: Gr1N/setup-poetry@v2
       with:
-        python_version: ${{ matrix.python-version }}
-        poetry_version: 1.0.5
-        args: add -n django@${{ matrix.django-version }}
+        poetry-version: 1.0.5
+
+    - uses: actions/cache@v1
+      id: cache
+      with:
+        path: ~/.cache/pypoetry/virtualenvs
+        key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-
+
+    - name: Install requirements
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: poetry install
+
+    - name: Install Django ${{ matrix.django-version }}
+      run: poetry shell & pip install django@${{ matrix.django-version }}
+
     - name: Test
-      uses: abatilo/actions-poetry@v1.5.0
-      with:
-        python_version: ${{ matrix.python-version }}
-        poetry_version: 1.0.5
-        args: run python -m pytest tests/
+      run: poetry run pytest
