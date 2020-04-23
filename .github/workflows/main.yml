@@ -30,9 +30,9 @@ jobs:
       id: cache
       with:
         path: ~/.cache/pypoetry/virtualenvs
-        key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}-py${{ matrix.python-version }}-dj${{ matrix.django-version }}
+        key: ${{ runner.os }}-py${{ matrix.python-version }}-dj${{ matrix.django-version }}-poetry-${{ hashFiles('poetry.lock') }}
         restore-keys: |
-          ${{ runner.os }}-poetry-
+          ${{ runner.os }-py${{ matrix.python-version }}-dj${{ matrix.django-version }}-poetry-
 
     - name: Install requirements
       if: steps.cache.outputs.cache-hit != 'true'
