@@ -33,6 +33,7 @@ django = {version = ">=2.2, <3.1"}
 djangorestframework = {version = "^3.11.0"} 
 django-filter = {version = "^2.2.0", optional = true}
 black = "^19.10b0"
+pytest-django = "^3.9.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7.8"
