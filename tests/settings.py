@@ -1,3 +1,5 @@
+import dj_database_url as db
+
 DEBUG = True
 TESTING = True
 
@@ -7,8 +9,8 @@ SECRET_KEY = "testingsecretkey"
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'test_database',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        **db.config(default="postgres://127.0.0.1:5455/ariadne_extended"),
     }
 }
 

@@ -21,4 +21,5 @@ max_line_length = 99
 insert_final_newline = false
 
 [*.yml]
-tab_width = 2
+indent_style = space
+indent_size = 2

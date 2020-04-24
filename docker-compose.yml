@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:12-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: "ariadne_extended"
+      POSTGRES_USER: "${USER}"

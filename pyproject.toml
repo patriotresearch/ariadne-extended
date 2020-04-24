@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "ariadne-extended"
 version = "0.1.0"
-description = "Ariadne contrib library for working with Django"
+description = "Ariadne contrib library for working with Django and GraphQL"
 authors = ["Patrick Forringer <pforringer@patriotrc.com>", "Buddy Lindsey <blindsey@patriotrc.com"]
 license = "MIT"
 readme = "README.md"
@@ -9,7 +9,9 @@ keywords = ["ariadne-extended"]
 repository = "https://github.com/patriotresearch/ariadne-extended"
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
+    'Framework :: Django',
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -47,6 +49,8 @@ django-filter = "^2.2.0"
 pytest = "^5.2"
 pytest-watch = "^4.2.0"
 pytest-runner = "^5.1"
+dj-database-url = "^0.5.0"
+psycopg2-binary = "^2.8.5"
 
 [tool.poetry.scripts]
 test = "pytest"
