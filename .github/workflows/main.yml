@@ -13,62 +13,63 @@ jobs:
         django-version: [2.2.*, 3.0.*]
         drf-version: [3.7.*, 3.8.*, 3.9.*, 3.*]
         # Remove unsupported combinations
+        name: [3.7.*, 3.8.*, 3.9.*, 3.*, 2.2.*, 3.0.*] # why?
         exclude:
-        - python-version: 3.7
-          django-version: 3.0.*
-          drf-version: 3.7.*
-        - python-version: 3.7
-          django-version: 3.0.*
-          drf-version: 3.8.*,
-        - python-version: 3.7
-          django-version: 3.0.*
-          drf-version: 3.9.*
-        - python-version: 3.8
-          django-version: 3.0.*
-          drf-version: 3.7.*
-        - python-version: 3.8
-          django-version: 3.0.*
-          drf-version: 3.8.*,
-        - python-version: 3.8
-          django-version: 3.0.*
-          drf-version: 3.9.*,
+          - python-version: 3.7
+            django-version: 3.0.*
+            drf-version: 3.7.*
+          - python-version: 3.7
+            django-version: 3.0.*
+            drf-version: 3.8.*,
+          - python-version: 3.7
+            django-version: 3.0.*
+            drf-version: 3.9.*
+          - python-version: 3.8
+            django-version: 3.0.*
+            drf-version: 3.7.*
+          - python-version: 3.8
+            django-version: 3.0.*
+            drf-version: 3.8.*,
+          - python-version: 3.8
+            django-version: 3.0.*
+            drf-version: 3.9.*,
  
     steps:
-    - uses: actions/checkout@v1
+      - uses: actions/checkout@v1
 
-    - name: Setup Postgresql
-      uses: harmon758/postgresql-action@v1
-      with:
-        postgresql version: "11.6-alpine"
-        postgresql db: "ariadne_extended"
-        postgresql user: "runner"
+      - name: Setup Postgresql
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: "11.6-alpine"
+          postgresql db: "ariadne_extended"
+          postgresql user: "runner"
 
-    - name: "Install Python ${{ matrix.python-version }}"
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: "Install Python ${{ matrix.python-version }}"
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: "Install Poetry"
-      uses: Gr1N/setup-poetry@v2
-      with:
-        poetry-version: 1.0.5
+      - name: "Install Poetry"
+        uses: Gr1N/setup-poetry@v2
+        with:
+          poetry-version: 1.0.5
 
-    - uses: actions/cache@v1
-      id: cache
-      with:
-        path: ~/.cache/pypoetry/virtualenvs
-        key: |
-          ${{ runner.os }}-py${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}-dj${{ matrix.django-version }}-drf${{ matrix.drf-version }}
-        restore-keys: |
-          ${{ runner.os }}-py${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: |
+            ${{ runner.os }}-py${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}-dj${{ matrix.django-version }}-drf${{ matrix.drf-version }}
+          restore-keys: |
+            ${{ runner.os }}-py${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}
 
-    - name: Install requirements
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: poetry install
+      - name: Install requirements
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: poetry install
 
-    - name: Install Django ${{ matrix.django-version }}, DRF ${{ matrix.drf-version }}
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: poetry run pip install django==${{ matrix.django-version }} djangorestframework==${{ matrix.drf-version }}
+      - name: Install Django ${{ matrix.django-version }}, DRF ${{ matrix.drf-version }}
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: poetry run pip install django==${{ matrix.django-version }} djangorestframework==${{ matrix.drf-version }}
 
-    - name: Test
-      run: poetry run pytest
+      - name: Test
+        run: poetry run pytest
