@@ -6,8 +6,8 @@ from ariadne_extended.utils.abc import concreter
 ConcreteResolver = concreter(Resolver)
 
 
-@patch("graph.resolvers.ListModelResolver.initial")
-@patch("graph.resolvers.ListModelResolver.list")
+@patch("ariadne_extended.resolvers.ListModelResolver.initial")
+@patch("ariadne_extended.resolvers.ListModelResolver.list")
 def test_resolve_uses_proper_method(mock_list, mock_initial):
     mock_list.return_value = "handler called"
     resolver = ListModelResolver(None, None)
@@ -19,8 +19,8 @@ def test_resolve_uses_proper_method(mock_list, mock_initial):
     assert fn == "handler called"
 
 
-@patch("graph.resolvers.ModelResolver.initial")
-@patch("graph.resolvers.ModelResolver.retrieve")
+@patch("ariadne_extended.resolvers.ModelResolver.initial")
+@patch("ariadne_extended.resolvers.ModelResolver.retrieve")
 def test_resolve_uses_retrieve_by_default(mock_retrieve, mock_initial):
     mock_retrieve.return_value = "handler called"
     resolver = ModelResolver(None, None)
@@ -32,7 +32,7 @@ def test_resolve_uses_retrieve_by_default(mock_retrieve, mock_initial):
     assert fn == "handler called"
 
 
-@patch("graph.resolvers.Resolver.get_operation_kwargs")
+@patch("ariadne_extended.resolvers.Resolver.get_operation_kwargs")
 def test_resolver_initial_args(mock_get_operation_kwargs):
     mock_get_operation_kwargs.return_value = "translated_kwargs"
     parent = "parent_obj"

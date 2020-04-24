@@ -15,6 +15,8 @@ DATABASES = {
 CELERY_TASK_ALWAYS_EAGER = True
 
 INSTALLED_APPS = [
+    "django.contrib.contenttypes",
+    "tests",
     "ariadne_extended.graph_loader",
     "ariadne_extended.cursor_pagination",
     "ariadne_extended.uuid",
