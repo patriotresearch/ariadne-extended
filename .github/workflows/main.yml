@@ -4,15 +4,21 @@ on: [push, pull_request]
 
 jobs:
   Tests:
-    # needs: Linting
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       max-parallel: 2
       matrix:
-        python-version: [3.6, 3.7, 3.8]
-        django-version: [2.2.12, 3.0.5]
-        drf-version: [3.7.*, 3.*]
+        python-version: [2.7, 3.7, 3.8]
+        django-version: [2.2.*, 3.0.*]
+        drf-version: [3.7.*, 3.8.*, 3.9.*, 3.*]
+        # Remove unsupported combinations
+        exclude:
+          # Python 2 not supported on django3 or DRF > 3.9
+          - python-version: 2.7
+            django-version: 3.0.*
+          - python-version: 2.7
+            drf-version: 3.*
 
     steps:
     - uses: actions/checkout@v1
@@ -38,9 +44,10 @@ jobs:
       id: cache
       with:
         path: ~/.cache/pypoetry/virtualenvs
-        key: ${{ runner.os }}-py${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}
+        key: |
+          ${{ runner.os }}-py${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}-dj${{ matrix.django-version }}-drf${{ matrix.drf-version }}
         restore-keys: |
-          ${{ runner.os }}-py${{ matrix.python-version }}
+          ${{ runner.os }}-py${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}
 
     - name: Install requirements
       if: steps.cache.outputs.cache-hit != 'true'
