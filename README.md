@@ -14,7 +14,7 @@ The overall goal is to provide often re-used modules and GrpahQL schema, so one 
 * Throttling
 * django-filters filter backend
 
-### `ariadne_extended.graph`
+### `ariadne_extended.graph_loader`
 
 auto schema, resolver and types loader 
 

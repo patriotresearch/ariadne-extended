@@ -12,6 +12,7 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8]
         django-version: [2.2.12, 3.0.5]
+        drf-version: [3.7.*, 3.*]
 
     steps:
     - uses: actions/checkout@v1
@@ -37,17 +38,16 @@ jobs:
       id: cache
       with:
         path: ~/.cache/pypoetry/virtualenvs
-        key: ${{ runner.os }}-py${{ matrix.python-version }}-dj${{ matrix.django-version }}-poetry-${{ hashFiles('poetry.lock') }}
+        key: ${{ runner.os }}-py${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}
         restore-keys: |
-          ${{ runner.os }}-py${{ matrix.python-version }}-dj${{ matrix.django-version }}
+          ${{ runner.os }}-py${{ matrix.python-version }}
 
     - name: Install requirements
       if: steps.cache.outputs.cache-hit != 'true'
       run: poetry install
 
-    - name: Install Django ${{ matrix.django-version }}
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: poetry run pip install django==${{ matrix.django-version }}
+    - name: Install Django ${{ matrix.django-version }}, DRF ${{ matrix.drf-version }}
+      run: poetry run pip install django==${{ matrix.django-version }} djangorestframework==${{ matrix.drf-version }}
 
     - name: Test
       run: poetry run pytest
