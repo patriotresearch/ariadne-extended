@@ -14,24 +14,24 @@ jobs:
         drf-version: [3.7.*, 3.8.*, 3.9.*, 3.*]
         # Remove unsupported combinations
         exclude:
-          - python-version: 3.7
-            django-version: 3.0.*
-            drf-version: 3.7.*
-          - python-version: 3.7
-            django-version: 3.0.*
-            drf-version: 3.8.*,
-          - python-version: 3.7
-            django-version: 3.0.*
-            drf-version: 3.9.*
-          - python-version: 3.8
-            django-version: 3.0.*
-            drf-version: 3.7.*
-          - python-version: 3.8
-            django-version: 3.0.*
-            drf-version: 3.8.*,
-          - python-version: 3.8
-            django-version: 3.0.*
-            drf-version: 3.9.*,
+        - python-version: 3.7
+          django-version: 3.0.*
+          drf-version: 3.7.*
+        - python-version: 3.7
+          django-version: 3.0.*
+          drf-version: 3.8.*,
+        - python-version: 3.7
+          django-version: 3.0.*
+          drf-version: 3.9.*
+        - python-version: 3.8
+          django-version: 3.0.*
+          drf-version: 3.7.*
+        - python-version: 3.8
+          django-version: 3.0.*
+          drf-version: 3.8.*,
+        - python-version: 3.8
+          django-version: 3.0.*
+          drf-version: 3.9.*,
  
     steps:
     - uses: actions/checkout@v1
