@@ -31,6 +31,7 @@ jobs:
             drf-version: 3.8.*,
           - python-version: 3.8
             django-version: 3.0.*
+            drf-version: 3.9.*,
  
     steps:
     - uses: actions/checkout@v1
@@ -66,6 +67,7 @@ jobs:
       run: poetry install
 
     - name: Install Django ${{ matrix.django-version }}, DRF ${{ matrix.drf-version }}
+      if: steps.cache.outputs.cache-hit != 'true'
       run: poetry run pip install django==${{ matrix.django-version }} djangorestframework==${{ matrix.drf-version }}
 
     - name: Test
