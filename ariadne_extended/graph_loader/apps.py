@@ -2,7 +2,7 @@ import logging
 from importlib import import_module
 from os import path
 
-from ariadne import load_schema_from_path
+from ariadne import ObjectType, ScalarType, load_schema_from_path
 from django.apps import AppConfig
 from django.apps.registry import apps
 
@@ -61,8 +61,12 @@ class GraphLoaderConfig(AppConfig):
     def load_custom_types(self, config):
         try:
             types_module = import_module(".types", package=config.name)
-            for type_name in types_module.__all__:
-                self.types.append(getattr(types_module, type_name))
+            for type_name in [
+                t
+                for _, t in types_module.__dict__.items()
+                if isinstance(t, ObjectType) or isinstance(t, ScalarType)
+            ]:
+                self.types.append(type_name)
         except ModuleNotFoundError as e:
             if e.name != f"{config.name}.types":
                 raise e
@@ -72,7 +76,6 @@ class GraphLoaderConfig(AppConfig):
             raise e
         else:
             logger.debug("found types in %s!", config.name)
-
 
     @property
     def all_app_types(self):

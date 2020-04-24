@@ -1,11 +1,9 @@
 """
-TODO: remove dependancy on DRF field
+TODO: remove dependency on DRF field
 """
 from ariadne import ScalarType
 
 from rest_framework.fields import UUIDField
-
-__all__ = ["uuid"]
 
 
 uuid_field = UUIDField()
