@@ -35,7 +35,7 @@ class GraphLoaderConfig(AppConfig):
 
     def load_schema(self, config):
         try:
-            self.type_defs.append(load_schema_from_path(path.join(config.path, "schema.graphql")))
+            self.type_defs.append(load_schema_from_path(path.join(config.path)))
             logger.debug("Found graphql schema")
         except FileNotFoundError:
             pass
