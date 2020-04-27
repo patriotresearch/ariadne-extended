@@ -10,28 +10,28 @@ jobs:
       max-parallel: 3
       matrix:
         python-version: [3.7, 3.8]
-        django-version: [2.2.*, 3.0.*]
-        drf-version: [3.7.*, 3.8.*, 3.9.*, 3.*]
+        django-version: [2.2.12, 3.0.]
+        drf-version: [3.7.7, 3.8.2, 3.9.4, 3.11.0]
         # Remove unsupported combinations
         exclude:
           - python-version: 3.7
-            django-version: 3.0.*
-            drf-version: 3.7.*
+            django-version: 3.0.5
+            drf-version: 3.7.7
           - python-version: 3.7
-            django-version: 3.0.*
-            drf-version: 3.8.*,
+            django-version: 3.0.5
+            drf-version: 3.8.2
           - python-version: 3.7
-            django-version: 3.0.*
-            drf-version: 3.9.*
+            django-version: 3.0.5
+            drf-version: 3.9.4
           - python-version: 3.8
-            django-version: 3.0.*
-            drf-version: 3.7.*
+            django-version: 3.0.5
+            drf-version: 3.7.7
           - python-version: 3.8
-            django-version: 3.0.*
-            drf-version: 3.8.*,
+            django-version: 3.0.5
+            drf-version: 3.8.2
           - python-version: 3.8
-            django-version: 3.0.*
-            drf-version: 3.9.*,
+            django-version: 3.0.5
+            drf-version: 3.9.4
  
     steps:
       - uses: actions/checkout@v1
