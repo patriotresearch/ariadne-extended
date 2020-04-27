@@ -18,7 +18,7 @@ The overall goal is to provide often re-used modules and GrpahQL schema, so one 
 
 auto schema, resolver and types loader 
 
-Searches for `types` and `resolvers` modules as well as the `schema.graphql` defined within every installed Django application.
+Searches for `types` and `resolvers` modules as well as any `.graphql` files defined within any installed Django application.
 
 Once found they can be used to build the final schema and resolver solution for your ariadne application.
 
