@@ -50,6 +50,12 @@ class GenericModelResolver(Resolver):
 
             return queryset.filter(**params)
 
+    def get_lookup_arg(self):
+        return self.config.get("lookup_arg", self.lookup_arg)
+
+    def get_lookup_field(self):
+        return self.config.get("lookup_field", self.lookup_field)
+
     def get_object(self):
         """
         Returns the object the resolver is displaying.
@@ -61,7 +67,7 @@ class GenericModelResolver(Resolver):
         queryset = self.get_queryset()
 
         # Perform the lookup filtering.
-        lookup_arg = self.lookup_arg or self.lookup_field
+        lookup_arg = self.get_lookup_arg() or self.get_lookup_field()
 
         assert lookup_arg in self.operation_kwargs, (
             "Expected resolver %s to be called with an argument "
@@ -69,10 +75,12 @@ class GenericModelResolver(Resolver):
             "attribute on the resolver correctly." % (self.__class__.__name__, lookup_arg)
         )
 
-        filter_kwargs = {self.lookup_field: self.operation_kwargs[lookup_arg]}
-        obj = queryset.get(**filter_kwargs)
-        # return null?
-        # obj = get_object_or_404(queryset, **filter_kwargs)
+        filter_kwargs = {self.get_lookup_field(): self.operation_kwargs[lookup_arg]}
+
+        try:
+            obj = queryset.get(**filter_kwargs)
+        except queryset.model.DoesNotExist:
+            return None
 
         # May raise a permission denied
         if obj:
@@ -85,7 +93,9 @@ class GenericModelResolver(Resolver):
         return self.get_object()
 
 
-class ModelResolver(CreateModelMixin, UpdateModelMixin, DestroyModelMixin, FilterMixin, GenericModelResolver):
+class ModelResolver(
+    CreateModelMixin, UpdateModelMixin, DestroyModelMixin, FilterMixin, GenericModelResolver
+):
     pass
 
 

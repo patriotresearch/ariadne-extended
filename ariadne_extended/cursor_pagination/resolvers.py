@@ -46,4 +46,5 @@ class RelayModelResolver(RelayModelMixin, ModelResolver):
     """
     Model resolver that provides cursor based pagination
     """
+
     pass
