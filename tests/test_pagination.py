@@ -179,7 +179,6 @@ class TestRelationships(TestCase):
         self.assertSequenceEqual(page, [self.charges[1], self.charges[3]])
 
     def test_after_page(self):
-        # import ipdb; ipdb.set_trace()
         cursor = self.paginator.cursor(self.charges[17])
         page = self.paginator.page(first=2, after=cursor)
         self.assertSequenceEqual(page, [self.charges[19], self.charges[0]])

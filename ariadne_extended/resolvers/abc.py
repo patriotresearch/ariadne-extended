@@ -15,9 +15,9 @@ class Resolver(abc.ABC):
     throttle_classes = []
     authentication_classes = []
 
-    def __init__(self, parent, info, *operation_args, resolver_config=dict(), **operation_kwargs):
+    def __init__(self, parent, info, *operation_args, config=dict(), **operation_kwargs):
         # arguments used for this specific operation on the resolver
-        self.config = resolver_config.copy()
+        self.config = config.copy()
         self._operation_args = operation_args
         self._operation_kwargs = operation_kwargs
         self.operation_args = self.get_operation_args()
@@ -97,7 +97,7 @@ class Resolver(abc.ABC):
     @classonlymethod
     def as_resolver(cls, **resolver_config):
         def resolver(parent, info, *args, **kwargs):
-            self = cls(parent, info, resolver_config=resolver_config, *args, **kwargs)
+            self = cls(parent, info, config=resolver_config, *args, **kwargs)
             return self.resolve(parent, *self.operation_args, **self.operation_kwargs)
 
         resolver.resolver_class = cls
