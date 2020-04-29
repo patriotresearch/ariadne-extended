@@ -1,6 +1,5 @@
 import logging
 from importlib import import_module
-from os import path
 
 from ariadne import ObjectType, ScalarType, load_schema_from_path
 from django.apps import AppConfig
@@ -24,9 +23,6 @@ class GraphLoaderConfig(AppConfig):
 
         logger.debug("Trying to load resolvers and schemas:")
         for config in apps.get_app_configs():
-            logger.debug("Looking at %s", config.name)
-
-            # Schema
             self.load_schema(config)
             self.load_resolvers(config)
             self.load_custom_types(config)
@@ -35,12 +31,12 @@ class GraphLoaderConfig(AppConfig):
 
     def load_schema(self, config):
         try:
-            self.type_defs.append(load_schema_from_path(path.join(config.path)))
-            logger.debug("Found graphql schema")
+            schema = load_schema_from_path(config.path)
+            if schema:
+                self.type_defs.append(schema)
+                logger.debug("found schema in %s!", config.name)
         except FileNotFoundError:
             pass
-        else:
-            logger.debug("found schema in %s!", config.name)
 
     def load_resolvers(self, config):
         try:
@@ -51,7 +47,6 @@ class GraphLoaderConfig(AppConfig):
         except ModuleNotFoundError as e:
             if e.name != f"{config.name}.resolvers":
                 raise e
-            logger.debug("No resolvers found")
         except Exception as e:
             logger.error("Error loading types from %s", config.name)
             raise e
@@ -70,7 +65,6 @@ class GraphLoaderConfig(AppConfig):
         except ModuleNotFoundError as e:
             if e.name != f"{config.name}.types":
                 raise e
-            logger.debug("No types found")
         except Exception as e:
             logger.error("Error loading types from %s", config.name)
             raise e
