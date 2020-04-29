@@ -15,12 +15,17 @@ class Resolver(abc.ABC):
     throttle_classes = []
     authentication_classes = []
 
-    def __init__(self, parent, info, config=dict(), **operation_kwargs):
+    def __init__(self, parent, info, *operation_args, resolver_config=dict(), **operation_kwargs):
         # arguments used for this specific operation on the resolver
-        self.config = config.copy()
+        self.config = resolver_config.copy()
+        self._operation_args = operation_args
         self._operation_kwargs = operation_kwargs
+        self.operation_args = self.get_operation_args()
         self.operation_kwargs = self.get_operation_kwargs()
+        # normalize federation reference args from ariadne
+        self.reference_kwargs = self.get_reference_kwargs()
         self.parent = parent
+
         # TODO: info may have to be wrapped in a Request compat object to work with
         # permissions and filtering.
         self.info = info
@@ -34,19 +39,28 @@ class Resolver(abc.ABC):
         self.check_permissions(info)
         self.check_throttles(info)
 
-    def resolve(self, parent, **kwargs):
+    def resolve(self, parent, *args, **kwargs):
         """Similar to a dispatch method"""
         self.initial(self.info, **kwargs)
 
         method = self.config.get("method", "retrieve")
         handler = getattr(self, method)
-        return handler(parent, **kwargs)
+        return handler(parent, *args, **kwargs)
+
+    def get_operation_args(self):
+        return self._operation_args
 
     def get_operation_kwargs(self):
         op_values = self._operation_kwargs.copy()
 
         # convert camelcase to snake case on all
         return humps.decamelize(op_values)
+
+    def get_reference_kwargs(self):
+        if self.config.get("reference", False):
+            return humps.decamelize(self.operation_args[0])
+        else:
+            return dict()
 
     def get_serializer(self, *args, **kwargs):
         """
@@ -82,12 +96,9 @@ class Resolver(abc.ABC):
 
     @classonlymethod
     def as_resolver(cls, **resolver_config):
-        # TODO: resolver specific configuration
-        # Is this a list or singular resolver?
-
-        def resolver(parent, info, **kwargs):
-            self = cls(parent, info, resolver_config, **kwargs)
-            return self.resolve(parent, **self.operation_kwargs)
+        def resolver(parent, info, *args, **kwargs):
+            self = cls(parent, info, resolver_config=resolver_config, *args, **kwargs)
+            return self.resolve(parent, *self.operation_args, **self.operation_kwargs)
 
         resolver.resolver_class = cls
 
@@ -102,6 +113,12 @@ class Resolver(abc.ABC):
     @classonlymethod
     def as_nested_resolver(cls, **resolver_config):
         resolver_config["nested"] = True
+        resolver = cls.as_resolver(**resolver_config)
+        return resolver
+
+    @classonlymethod
+    def as_reference_resolver(cls, **resolver_config):
+        resolver_config["reference"] = True
         resolver = cls.as_resolver(**resolver_config)
         return resolver
 

@@ -68,7 +68,7 @@ class InputMixin:
 
 
 class CreateModelMixin(InputMixin):
-    def create(self, parent, **kwargs):
+    def create(self, parent, *args, **kwargs):
         serializer = self.get_serializer(data=self.get_input_data())
         valid = serializer.is_valid(raise_exception=False)
         if valid:

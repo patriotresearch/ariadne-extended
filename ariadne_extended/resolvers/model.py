@@ -56,6 +56,9 @@ class GenericModelResolver(Resolver):
     def get_lookup_field(self):
         return self.config.get("lookup_field", self.lookup_field)
 
+    def get_lookup_operation_data(self):
+        return self.operation_kwargs
+
     def get_object(self):
         """
         Returns the object the resolver is displaying.
@@ -69,13 +72,15 @@ class GenericModelResolver(Resolver):
         # Perform the lookup filtering.
         lookup_arg = self.get_lookup_arg() or self.get_lookup_field()
 
-        assert lookup_arg in self.operation_kwargs, (
+        operation_data = self.get_lookup_operation_data()
+
+        assert lookup_arg in operation_data, (
             "Expected resolver %s to be called with an argument "
             'named "%s". Fix your query arguments, or set the `.lookup_field` '
             "attribute on the resolver correctly." % (self.__class__.__name__, lookup_arg)
         )
 
-        filter_kwargs = {self.get_lookup_field(): self.operation_kwargs[lookup_arg]}
+        filter_kwargs = {self.get_lookup_field(): operation_data[lookup_arg]}
 
         try:
             obj = queryset.get(**filter_kwargs)
@@ -89,7 +94,7 @@ class GenericModelResolver(Resolver):
         return obj
 
     # TODO: move out into its own mixin?
-    def retrieve(self, parent, **kwargs):
+    def retrieve(self, parent, *args, **kwargs):
         return self.get_object()
 
 
