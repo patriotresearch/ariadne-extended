@@ -51,7 +51,7 @@ class GraphLoaderConfig(AppConfig):
             logger.error("Error loading types from %s", config.name)
             raise e
         else:
-            logger.debug("found types in %s!", config.name)
+            logger.debug("found resolvers in %s!", config.name)
 
     def load_custom_types(self, config):
         try:

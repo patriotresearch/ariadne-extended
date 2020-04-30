@@ -57,18 +57,11 @@ class GenericModelResolver(Resolver):
         return self.config.get("lookup_field", self.lookup_field)
 
     def get_lookup_operation_data(self):
+        if self.config.get("reference", False):
+            return self.reference_kwargs
         return self.operation_kwargs
 
-    def get_object(self):
-        """
-        Returns the object the resolver is displaying.
-
-        You may want to override this if you need to provide non-standard
-        queryset lookups.  Eg if objects are referenced using multiple
-        keyword arguments in the url conf.
-        """
-        queryset = self.get_queryset()
-
+    def get_lookup_filter_kwargs(self):
         # Perform the lookup filtering.
         lookup_arg = self.get_lookup_arg() or self.get_lookup_field()
 
@@ -79,8 +72,19 @@ class GenericModelResolver(Resolver):
             'named "%s". Fix your query arguments, or set the `.lookup_field` '
             "attribute on the resolver correctly." % (self.__class__.__name__, lookup_arg)
         )
+        return {self.get_lookup_field(): operation_data[lookup_arg]}
 
-        filter_kwargs = {self.get_lookup_field(): operation_data[lookup_arg]}
+    def get_object(self):
+        """
+        Returns a singular object as configured by the resolver
+
+        You may want to override this if you need to provide non-standard
+        queryset lookups. Eg if objects are referenced using multiple
+        arguments.
+        """
+        queryset = self.get_queryset()
+
+        filter_kwargs = self.get_lookup_filter_kwargs()
 
         try:
             obj = queryset.get(**filter_kwargs)
