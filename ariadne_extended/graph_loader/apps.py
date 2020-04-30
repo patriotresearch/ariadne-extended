@@ -1,7 +1,7 @@
 import logging
 from importlib import import_module
 
-from ariadne import ObjectType, ScalarType, load_schema_from_path
+from ariadne import EnumType, ObjectType, ScalarType, UnionType, load_schema_from_path
 from django.apps import AppConfig
 from django.apps.registry import apps
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class GraphLoaderConfig(AppConfig):
     """
-    Graph loader finds all the schemas, resolvers and type definitions
+    Graph loader finds all the schemas, resolvers and type definitions in installed apps
     """
 
     name = "ariadne_extended.graph_loader"
@@ -59,7 +59,10 @@ class GraphLoaderConfig(AppConfig):
             for type_name in [
                 t
                 for _, t in types_module.__dict__.items()
-                if isinstance(t, ObjectType) or isinstance(t, ScalarType)
+                if isinstance(t, ObjectType)
+                or isinstance(t, ScalarType)
+                or isinstance(t, EnumType)
+                or isinstance(t, UnionType)
             ]:
                 self.types.append(type_name)
         except ModuleNotFoundError as e:
