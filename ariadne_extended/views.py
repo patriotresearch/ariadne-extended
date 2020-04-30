@@ -66,6 +66,7 @@ class BatchGraphQLView(LoginRequiredMixin, View):
     """
     Batch GraphQL view based on the graphene batch view.
     """
+
     # FIX: GraphQL errors aren't bubbling up properly, probably due to the differences with Graphene
     http_method_names = ["get", "post", "options"]
     schema: Optional[GraphQLSchema] = None

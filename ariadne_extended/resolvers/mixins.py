@@ -7,7 +7,6 @@ import enum
 from django.db.models.deletion import IntegrityError, ProtectedError
 
 
-
 class ListModelMixin:
     """
     List a queryset.
@@ -42,9 +41,7 @@ class ListModelMixin:
         """
         if self.paginator is None:
             return None
-        return self.paginator.paginate_queryset(
-            queryset, self.request, view=self, **kwargs
-        )
+        return self.paginator.paginate_queryset(queryset, self.request, view=self, **kwargs)
 
 
 class InputMixin:
@@ -89,9 +86,7 @@ class UpdateModelMixin:
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
         instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, data=self.get_input_data(), partial=partial
-        )
+        serializer = self.get_serializer(instance, data=self.get_input_data(), partial=partial)
         valid = serializer.is_valid(raise_exception=False)
 
         obj = instance

@@ -1,4 +1,5 @@
 from ariadne_extended.cursor_pagination import InternalPaginator, InvalidCursor
+
 # from charges.models import Charge
 from django.test import TestCase
 from model_bakery import baker
@@ -137,9 +138,7 @@ class TestTwoFieldPagination(TestCase):
             cls.charges.append(charge)
 
     def test_order(self):
-        paginator = InternalPaginator(
-            Charge.objects.all(), ("order", "item__description")
-        )
+        paginator = InternalPaginator(Charge.objects.all(), ("order", "item__description"))
         previous_page = paginator.page(first=2)
         self.assertSequenceEqual(previous_page, [self.charges[0], self.charges[1]])
         cursor = paginator.cursor(previous_page[-1])
@@ -147,9 +146,7 @@ class TestTwoFieldPagination(TestCase):
         self.assertSequenceEqual(page, [self.charges[2], self.charges[3]])
 
     def test_reverse_order(self):
-        paginator = InternalPaginator(
-            Charge.objects.all(), ("-order", "-item__description")
-        )
+        paginator = InternalPaginator(Charge.objects.all(), ("-order", "-item__description"))
         previous_page = paginator.page(first=2)
         self.assertSequenceEqual(previous_page, [self.charges[3], self.charges[2]])
         cursor = paginator.cursor(previous_page[-1])
@@ -167,12 +164,13 @@ class TestRelationships(TestCase):
         cls.charges = []
         for i in range(20):
             post = baker.make(
-                Charge, item__id=(1 if i % 2 else 2), item__number="%s" % "A item" if i % 2 else "B item", order=i
+                Charge,
+                item__id=(1 if i % 2 else 2),
+                item__number="%s" % "A item" if i % 2 else "B item",
+                order=i,
             )
             cls.charges.append(post)
-        cls.paginator = InternalPaginator(
-            Charge.objects.all(), ("item__number", "order")
-        )
+        cls.paginator = InternalPaginator(Charge.objects.all(), ("item__number", "order"))
 
     def test_first_page(self):
         page = self.paginator.page(first=2)
