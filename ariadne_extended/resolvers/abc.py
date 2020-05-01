@@ -1,4 +1,3 @@
-import abc
 from functools import update_wrapper
 
 import humps.main as humps
@@ -6,14 +5,13 @@ from django.utils.decorators import classonlymethod
 
 from . import exceptions
 
-# TODO: make serializer implementation abstract?
 
-
-class Resolver(abc.ABC):
+class Resolver:
 
     permission_classes = []
     throttle_classes = []
     authentication_classes = []
+    default_method = "retrieve"
 
     def __init__(self, parent, info, *operation_args, config=dict(), **operation_kwargs):
         # arguments used for this specific operation on the resolver
@@ -33,17 +31,19 @@ class Resolver(abc.ABC):
 
     def initial(self, info, *args, **kwargs):
         """
-        Runs anything that needs to occur prior to calling the operation handler.
+        Runs anything that needs to occur prior to calling the operation handler
         """
         self.perform_authentication(info)
         self.check_permissions(info)
         self.check_throttles(info)
 
     def resolve(self, parent, *args, **kwargs):
-        """Similar to a dispatch method"""
-        self.initial(self.info, **kwargs)
+        """
+        Run initial checks, then call the default or configured operation resolve handler
+        """
+        self.initial(self.info, *args, **kwargs)
 
-        method = self.config.get("method", "retrieve")
+        method = self.config.get("method", self.default_method)
         handler = getattr(self, method)
         return handler(parent, *args, **kwargs)
 
@@ -122,29 +122,29 @@ class Resolver(abc.ABC):
         resolver = cls.as_resolver(**resolver_config)
         return resolver
 
-    def permission_denied(self, request, message=None):
+    def permission_denied(self, info, message=None):
         """
-        If request is not permitted, determine what kind of exception to raise.
+        If resolution is not permitted, determine what kind of exception to raise.
         """
         raise exceptions.PermissionDenied(message)
 
-    def check_object_permissions(self, request, obj):
+    def check_object_permissions(self, info, obj):
         """
-        Check if the request should be permitted for a given object.
+        Check if the resolution should be permitted for a given object.
         Raises an appropriate exception if the request is not permitted.
         """
         for permission in self.get_permissions():
-            if not permission.has_object_permission(request, self, obj):
-                self.permission_denied(request, message=getattr(permission, "message", None))
+            if not permission.has_object_permission(info, self, obj):
+                self.permission_denied(info, message=getattr(permission, "message", None))
 
-    def check_throttles(self, request):
+    def check_throttles(self, info):
         """
-        Check if request should be throttled.
-        Raises an appropriate exception if the request is throttled.
+        Check if resolution should be throttled.
+        Raises an appropriate exception if the resolution is throttled.
         """
         throttle_durations = []
         for throttle in self.get_throttles():
-            if not throttle.allow_request(request, self):
+            if not throttle.allow_request(info, self):
                 throttle_durations.append(throttle.wait())
 
         if throttle_durations:
@@ -155,9 +155,9 @@ class Resolver(abc.ABC):
             duration = max(durations, default=None)
             self.throttled(request, duration)
 
-    def perform_authentication(self, request):
+    def perform_authentication(self, info):
         """
-        Perform authentication on the incoming request.
+        Perform authentication on the incoming resolution.
 
         Note that if you override this and simply 'pass', then authentication
         will instead be performed lazily, the first time either
@@ -165,14 +165,14 @@ class Resolver(abc.ABC):
         """
         pass
 
-    def check_permissions(self, request):
+    def check_permissions(self, info):
         """
-        Check if the request should be permitted.
-        Raises an appropriate exception if the request is not permitted.
+        Check if the resolution should be permitted.
+        Raises an appropriate exception if the resolution is not permitted.
         """
         for permission in self.get_permissions():
-            if not permission.has_permission(request, self):
-                self.permission_denied(request, message=getattr(permission, "message", None))
+            if not permission.has_permission(info, self):
+                self.permission_denied(info, message=getattr(permission, "message", None))
 
     def get_authenticators(self):
         """

@@ -51,3 +51,4 @@ DRF UUID field scalar for use with models that may use a UUID as their primary k
 - [ ] Better support of lists of enums when used with django-filters ( currently expects comma sep list string, not a list of enums from input field resolver )
 - [ ] License and make public
 - [ ] Deployment automation
+- [ ] Mixins are highly coupled to serializers, should they still be?

@@ -1,6 +1,5 @@
 """
-Mixins that are in conjunction with DRF serializers and resolver data
-TODO: these are highly coupled to serializers, should they still be?
+Mixins that are in DRF serializers and resolver data
 """
 import enum
 
@@ -15,7 +14,7 @@ class ListModelMixin:
     pagination_class = None
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.get_queryset()
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -45,6 +44,12 @@ class ListModelMixin:
 
 
 class InputMixin:
+    """
+    Take an input operation argument and return the data.
+
+    This mixin is pretty limited, nested enums under other input types will not be
+    converted into their value. FIX/CHANGE
+    """
     input_arg = "input"
     convert_enums = True
 

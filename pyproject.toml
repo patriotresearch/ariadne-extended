@@ -52,6 +52,8 @@ psycopg2-binary = "^2.8.5"
 bump2version = "^1.0.0"
 black = "^19.10b0"
 pytest-django = "^3.9.0"
+pytest-mock = "^3.1.0"
+glom = "^19.10.0"
 
 [tool.black]
 target-version = ['py38']

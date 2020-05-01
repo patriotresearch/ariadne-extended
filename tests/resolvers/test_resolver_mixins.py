@@ -1,9 +1,29 @@
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from ariadne_extended.resolvers import ListModelResolver, ModelResolver, Resolver
-from ariadne_extended.utils.abc import concreter
+from ariadne_extended.resolvers.mixins import InputMixin
 
-ConcreteResolver = concreter(Resolver)
+
+class ChildResolver(Resolver):
+    def stub_resolve_method(self, *args, **kwargs):
+        pass
+
+def test_input_mixin_attrs():
+    assert InputMixin.input_arg == "input"
+    assert InputMixin.convert_enums == True
+
+
+def test_input_mixin_get_input_arg():
+    class AlteredInputMixin(InputMixin):
+        input_arg = "another_input"
+
+    arg = InputMixin().get_input_arg()
+    assert arg == "input"
+
+    arg = AlteredInputMixin().get_input_arg()
+    assert arg == "another_input"
+
+# def test_enum_thing?
 
 
 @patch("ariadne_extended.resolvers.ListModelResolver.initial")
@@ -30,23 +50,3 @@ def test_resolve_uses_retrieve_by_default(mock_retrieve, mock_initial):
     mock_initial.assert_called()
 
     assert fn == "handler called"
-
-
-@patch("ariadne_extended.resolvers.Resolver.get_operation_kwargs")
-def test_resolver_initial_args(mock_get_operation_kwargs):
-    mock_get_operation_kwargs.return_value = "translated_kwargs"
-    parent = "parent_obj"
-    info = "info_obj"
-
-    resolver = ConcreteResolver(
-        parent, info, config=dict(test="config"), additional_operation="kwarg"
-    )
-
-    mock_get_operation_kwargs.assert_called()
-
-    assert resolver.info == info
-    assert resolver.request == info
-    assert resolver.parent == parent
-    assert resolver.config == dict(test="config")
-    assert resolver._operation_kwargs == dict(additional_operation="kwarg")
-    assert resolver.operation_kwargs == "translated_kwargs"
