@@ -9,8 +9,14 @@ type PageInfo {
 }
 
 # TODO: node type object field?
-interface Connection {
+type Connection {
   pageInfo: PageInfo
+  edges: [Edge]
+}
+
+type Edge {
+  cursor: String
+  node: Node
 }
 
 interface Node {

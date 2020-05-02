@@ -23,3 +23,7 @@ insert_final_newline = false
 [*.yml]
 indent_style = space
 indent_size = 2
+
+[*.graphql]
+indent_style = space
+indent_size = 2
