@@ -15,7 +15,7 @@ def resolve_page_info_count(parent, info, *args, **kwargs):
 
 
 def resolve_page_info(parent, info, *args, **kwargs) -> dict:
-    page = parent.get("page_info", None)
+    page = parent.get("pageInfo", None)
     try:
         end_cursor = page.cursor(page[-1])
     except IndexError:
@@ -25,10 +25,10 @@ def resolve_page_info(parent, info, *args, **kwargs) -> dict:
     except IndexError:
         start_cursor = None
     return {
-        "has_next_page": page.has_next,
-        "has_previous_page": page.has_previous,
-        "start_cursor": start_cursor,
-        "end_cursor": end_cursor,
+        "hasNextPage": page.has_next,
+        "hasPreviousPage": page.has_previous,
+        "startCursor": start_cursor,
+        "endCursor": end_cursor,
         "cursor": page,
     }
 

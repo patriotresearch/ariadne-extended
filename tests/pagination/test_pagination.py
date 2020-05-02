@@ -1,17 +1,15 @@
 from ariadne_extended.cursor_pagination import InternalPaginator, InvalidCursor
-
-# from charges.models import Charge
 from django.test import TestCase
 from model_bakery import baker
 
-from .models import Charge
+from .models import SomeItem
 
 
 class TestNoArgs(TestCase):
     maxDiff = None
 
     def test_empty(self):
-        paginator = InternalPaginator(Charge.objects.all(), ("id",))
+        paginator = InternalPaginator(SomeItem.objects.all(), ("id",))
         page = paginator.page()
         self.assertEqual(len(page), 0)
         self.assertFalse(page.has_next)
@@ -19,8 +17,8 @@ class TestNoArgs(TestCase):
 
     def test_with_items(self):
         for i in range(20):
-            baker.make(Charge, item__description="description %s" % i)
-        paginator = InternalPaginator(Charge.objects.all(), ("id",))
+            baker.make(SomeItem, item__description="description %s" % i)
+        paginator = InternalPaginator(SomeItem.objects.all(), ("id",))
         page = paginator.page()
         self.assertEqual(len(page), 20)
         self.assertFalse(page.has_next)
@@ -35,13 +33,13 @@ class TestForwardPagination(TestCase):
         cls.charges = []
         for i in range(20):
             charge = baker.make(
-                Charge,
+                SomeItem,
                 item__number="%s" % (i + 20),
                 item__description="description %s" % i,
                 order=i,
             )
             cls.charges.append(charge)
-        cls.paginator = InternalPaginator(Charge.objects.all(), ("order",))
+        cls.paginator = InternalPaginator(SomeItem.objects.all(), ("order",))
 
     def test_first_page(self):
         page = self.paginator.page(first=2)
@@ -82,13 +80,13 @@ class TestBackwardsPagination(TestCase):
         cls.charges = []
         for i in range(20):
             post = baker.make(
-                Charge,
+                SomeItem,
                 item__number="%s" % (i + 20),
                 item__description="description %s" % i,
                 order=i,
             )
             cls.charges.append(post)
-        cls.paginator = InternalPaginator(Charge.objects.all(), ("order",))
+        cls.paginator = InternalPaginator(SomeItem.objects.all(), ("order",))
 
     def test_first_page(self):
         page = self.paginator.page(last=2)
@@ -130,7 +128,7 @@ class TestTwoFieldPagination(TestCase):
         data = [(0, "B"), (0, "C"), (0, "D"), (1, "A")]
         for order, description in data:
             charge = baker.make(
-                Charge,
+                SomeItem,
                 item__number="%s" % (order + 20),
                 item__description=description,
                 order=order,
@@ -138,7 +136,7 @@ class TestTwoFieldPagination(TestCase):
             cls.charges.append(charge)
 
     def test_order(self):
-        paginator = InternalPaginator(Charge.objects.all(), ("order", "item__description"))
+        paginator = InternalPaginator(SomeItem.objects.all(), ("order", "item__description"))
         previous_page = paginator.page(first=2)
         self.assertSequenceEqual(previous_page, [self.charges[0], self.charges[1]])
         cursor = paginator.cursor(previous_page[-1])
@@ -146,7 +144,7 @@ class TestTwoFieldPagination(TestCase):
         self.assertSequenceEqual(page, [self.charges[2], self.charges[3]])
 
     def test_reverse_order(self):
-        paginator = InternalPaginator(Charge.objects.all(), ("-order", "-item__description"))
+        paginator = InternalPaginator(SomeItem.objects.all(), ("-order", "-item__description"))
         previous_page = paginator.page(first=2)
         self.assertSequenceEqual(previous_page, [self.charges[3], self.charges[2]])
         cursor = paginator.cursor(previous_page[-1])
@@ -155,7 +153,7 @@ class TestTwoFieldPagination(TestCase):
 
     def test_mixed_order(self):
         with self.assertRaises(InvalidCursor):
-            InternalPaginator(Charge.objects.all(), ("order", "-item__description"))
+            InternalPaginator(SomeItem.objects.all(), ("order", "-item__description"))
 
 
 class TestRelationships(TestCase):
@@ -164,13 +162,13 @@ class TestRelationships(TestCase):
         cls.charges = []
         for i in range(20):
             post = baker.make(
-                Charge,
+                SomeItem,
                 item__id=(1 if i % 2 else 2),
                 item__number="%s" % "A item" if i % 2 else "B item",
                 order=i,
             )
             cls.charges.append(post)
-        cls.paginator = InternalPaginator(Charge.objects.all(), ("item__number", "order"))
+        cls.paginator = InternalPaginator(SomeItem.objects.all(), ("item__number", "order"))
 
     def test_first_page(self):
         page = self.paginator.page(first=2)

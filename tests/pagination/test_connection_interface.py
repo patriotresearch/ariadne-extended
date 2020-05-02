@@ -4,7 +4,6 @@ import pytest
 from ariadne import EnumType, QueryType, make_executable_schema
 from ariadne_extended.cursor_pagination import RelayModelMixin
 from ariadne_extended.resolvers.model import GenericModelResolver
-from glom import glom
 from graphql import  graphql_sync
 from django.apps import apps
 from model_bakery import baker
@@ -20,6 +19,7 @@ class SomethingResolver(RelayModelMixin, GenericModelResolver):
     model = Something
     queryset = Something.objects.all()
     ordering = ("id", "name",)
+
 
 @pytest.mark.django_db
 def test_enum_input_value_resolution(mocker):
@@ -58,10 +58,16 @@ def test_enum_input_value_resolution(mocker):
         """
             query {
                 things(first: 5) {
+                    pageInfo {
+                        hasNextPage
+                        hasPreviousPage
+                        startCursor
+                        endCursor
+                        count
+                    }
                     edges {
                         cursor
                         node {
-                            __typename
                             id
                             ... on Something {
                                 name
@@ -73,4 +79,51 @@ def test_enum_input_value_resolution(mocker):
         """
     )
     assert result.errors is None
-    # assert glom(result.data, "things[0].node.name") == "st0"
+    assert result.data == dict(
+        things=dict(
+            pageInfo=dict(
+                hasNextPage=True,
+                hasPreviousPage=False,
+                startCursor="MXxzdDA=",
+                endCursor="NXxzdDQ=",
+                count=20
+            ),
+            edges=[
+                dict(
+                    cursor="MXxzdDA=",
+                    node=dict(
+                        id='1',
+                        name="st0"
+                    )
+                ),
+                dict(
+                    cursor="MnxzdDE=",
+                    node=dict(
+                        id='2',
+                        name="st1"
+                    )
+                ),
+                dict(
+                    cursor="M3xzdDI=",
+                    node=dict(
+                        id='3',
+                        name="st2"
+                    )
+                ),
+                dict(
+                    cursor="NHxzdDM=",
+                    node=dict(
+                        id='4',
+                        name="st3"
+                    )
+                ),
+                dict(
+                    cursor="NXxzdDQ=",
+                    node=dict(
+                        id='5',
+                        name="st4"
+                    )
+                ),
+            ]
+        )
+    )
