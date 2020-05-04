@@ -10,7 +10,9 @@ node = InterfaceType("Node")
 
 def resolve_node_type(obj, *args):
     if isinstance(obj, models.Model):
-        # TODO: custom model attribute to map to graphql type or some other mechanism.
+        gtype = getattr(obj, "graphql_type", None)
+        if isinstance(gtype, str):
+            return gtype
         return obj.__class__.__name__
 
 
