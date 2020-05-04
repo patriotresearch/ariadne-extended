@@ -8,7 +8,11 @@ type PageInfo {
   count: Int # non-standard relay field, returns full count of pageable items
 }
 
-type Connection {
+interface ListPageInfo {
+  pageInfo: PageInfo
+}
+
+type Connection implements ListPageInfo {
   pageInfo: PageInfo
   edges: [Edge]
 }
