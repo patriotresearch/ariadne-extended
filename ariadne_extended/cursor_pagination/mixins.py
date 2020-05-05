@@ -26,5 +26,5 @@ class RelayModelMixin(ListModelMixin):
         page = super().list(request, *args, **kwargs)
         return {
             "edges": [{"cursor": page.cursor(node), "node": node} for node in page],
-            "page_info": page,
+            "pageInfo": page,
         }

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db import models
 
 
 class Item(models.Model):
@@ -6,6 +7,11 @@ class Item(models.Model):
     description = models.TextField(max_length="25")
 
 
-class Charge(models.Model):
+class SomeItem(models.Model):
     order = models.PositiveIntegerField()
     item = models.ForeignKey(Item, blank=True, null=True, on_delete=models.CASCADE)
+
+
+class Something(models.Model):
+    order = models.PositiveIntegerField()
+    name = models.CharField(max_length=4)

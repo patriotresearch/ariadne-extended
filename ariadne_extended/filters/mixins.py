@@ -28,6 +28,8 @@ class FilterMixin:
         """
         Called by the filter backend when determining how to filter
         """
+        if self.config.get("reference", False):
+            return self.reference_kwargs
         return self.operation_kwargs.get(self.filter_arg, {})
 
     def get_queryset(self):

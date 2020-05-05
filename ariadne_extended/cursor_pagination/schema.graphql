@@ -5,12 +5,21 @@ type PageInfo {
   hasPreviousPage: Boolean!
   startCursor: String
   endCursor: String
-  count: Int
+  count: Int # non-standard relay field, returns full count of pageable items
 }
 
-# TODO: node type object field?
-interface Connection {
+interface ListPageInfo {
   pageInfo: PageInfo
+}
+
+type Connection implements ListPageInfo {
+  pageInfo: PageInfo
+  edges: [Edge]
+}
+
+type Edge {
+  cursor: String
+  node: Node
 }
 
 interface Node {

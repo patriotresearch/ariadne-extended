@@ -5,9 +5,7 @@ from ariadne import EnumType, QueryType, make_executable_schema
 from ariadne_extended.resolvers import Resolver
 from ariadne_extended.resolvers.mixins import InputMixin
 from glom import glom
-from graphql import graphql, graphql_sync
-from graphql.utilities import strip_ignored_characters as sic
-from graphql.utilities.schema_printer import print_interface, print_object, print_union
+from graphql import  graphql_sync
 
 
 def test_input_mixin_attrs():
