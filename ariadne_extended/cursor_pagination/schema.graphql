@@ -3,8 +3,8 @@
 type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
-  startCursor: String!
-  endCursor: String!
+  startCursor: String
+  endCursor: String
   count: Int # non-standard relay field, returns full count of pageable items
 }
 
@@ -23,5 +23,5 @@ type Edge {
 }
 
 interface Node {
-  id: ID
+  id: ID!
 }
