@@ -50,6 +50,7 @@ class InputMixin:
     This mixin is pretty limited, nested enums under other input types will not be
     converted into their value. FIX/CHANGE
     """
+
     input_arg = "input"
     convert_enums = True
 

@@ -78,8 +78,9 @@ Ready to contribute? Here's how to set up `ariadne-extended` for local developme
 5. When you're done making changes, check that your changes pass flake8 and the
    tests, including testing other Python versions with tox::
 
-    $ poetry run flake8 ariadne-extended tests
+    $ poetry run flake8 ariadne_extended tests
     $ poetry run pytest
+    $ poetry run pytest --cov=ariadne_extended tests/
 
 6. Commit your changes and push your branch to GitHub::
 
