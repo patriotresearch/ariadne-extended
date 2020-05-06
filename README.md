@@ -14,6 +14,11 @@ The overall goal is to provide often re-used modules and GrpahQL schema, so one 
 * Throttling
 * django-filters filter backend
 
+## Supported Django versions
+
+**2.2.*, 3.0.\***
+
+
 ### `ariadne_extended.graph_loader`
 
 auto schema, resolver and types loader 
@@ -35,7 +40,7 @@ Contains the `PageInfo` graphql type and `Connection` interface for utilizing cu
 TODO: Should we provide a input type for cursor pagination instead of just copying pagination args info paginate-able list fields??
 
 ### `ariadne_extended.filters`
-Filter backend interface to pass filter arguments to django-filter
+Filter backend interface to pass filter arguments to django-filter.
 
 ### `ariadne_extended.resolvers`
 ABC for Class Based Resolvers and model resolvers that utilize DRF serializers for saving data. This is likely to change in the future.
@@ -43,12 +48,19 @@ ABC for Class Based Resolvers and model resolvers that utilize DRF serializers f
 ### `ariadne_extended.uuid`
 DRF UUID field scalar for use with models that may use a UUID as their primary key, or other UUID fields.
 
+## Contrib
+
+### `django-waffle` in `ariadne_extended.contrib.waffle_graph`
+
+Adds resolvers, schema and types that can be utilized to query the any waffle flags, samples and switches.
+
+
 # Checklist
 - [ ] Get rid of dependency on DRF?
 - [ ] Investigate the need for a serializer ( nested data reliance? )
 - [x] Organize code into multiple Django apps to select desired componentry
 - [ ] Documentation and examples
 - [ ] Better support of lists of enums when used with django-filters ( currently expects comma sep list string, not a list of enums from input field resolver )
-- [ ] License and make public
+- [x] License and make public
 - [ ] Deployment automation
 - [ ] Mixins are highly coupled to serializers, should they still be?

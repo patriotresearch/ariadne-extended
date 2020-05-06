@@ -4,7 +4,7 @@ import pytest
 from ariadne import EnumType, QueryType, make_executable_schema
 from ariadne_extended.cursor_pagination import RelayModelMixin
 from ariadne_extended.resolvers.model import GenericModelResolver
-from graphql import  graphql_sync
+from graphql import graphql_sync
 from django.apps import apps
 from model_bakery import baker
 
@@ -18,7 +18,10 @@ from .models import Something
 class SomethingResolver(RelayModelMixin, GenericModelResolver):
     model = Something
     queryset = Something.objects.all()
-    ordering = ("id", "name",)
+    ordering = (
+        "id",
+        "name",
+    )
 
 
 @pytest.mark.django_db
@@ -38,16 +41,16 @@ def test_enum_input_value_resolution(mocker):
         }
     """
 
-
     query = QueryType()
 
     query.set_field("things", SomethingResolver.as_resolver(method="list"))
 
-    resolvers = [query,]
+    resolvers = [
+        query,
+    ]
 
     schema = make_executable_schema(
-        config.type_defs + [type_defs],
-        config.all_app_types + resolvers
+        config.type_defs + [type_defs], config.all_app_types + resolvers
     )
 
     for i in range(20):
@@ -76,7 +79,7 @@ def test_enum_input_value_resolution(mocker):
                     }
                 }
             }
-        """
+        """,
     )
     assert result.errors is None
     assert result.data == dict(
@@ -86,44 +89,14 @@ def test_enum_input_value_resolution(mocker):
                 hasPreviousPage=False,
                 startCursor="MXxzdDA=",
                 endCursor="NXxzdDQ=",
-                count=20
+                count=20,
             ),
             edges=[
-                dict(
-                    cursor="MXxzdDA=",
-                    node=dict(
-                        id='1',
-                        name="st0"
-                    )
-                ),
-                dict(
-                    cursor="MnxzdDE=",
-                    node=dict(
-                        id='2',
-                        name="st1"
-                    )
-                ),
-                dict(
-                    cursor="M3xzdDI=",
-                    node=dict(
-                        id='3',
-                        name="st2"
-                    )
-                ),
-                dict(
-                    cursor="NHxzdDM=",
-                    node=dict(
-                        id='4',
-                        name="st3"
-                    )
-                ),
-                dict(
-                    cursor="NXxzdDQ=",
-                    node=dict(
-                        id='5',
-                        name="st4"
-                    )
-                ),
-            ]
+                dict(cursor="MXxzdDA=", node=dict(id="1", name="st0")),
+                dict(cursor="MnxzdDE=", node=dict(id="2", name="st1")),
+                dict(cursor="M3xzdDI=", node=dict(id="3", name="st2")),
+                dict(cursor="NHxzdDM=", node=dict(id="4", name="st3")),
+                dict(cursor="NXxzdDQ=", node=dict(id="5", name="st4")),
+            ],
         )
     )
