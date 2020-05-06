@@ -32,4 +32,3 @@ def test_resolve_uses_retrieve_by_default(mock_retrieve, mock_initial):
     mock_initial.assert_called()
 
     assert fn == "handler called"
-

@@ -8,6 +8,7 @@ class ChildResolver(Resolver):
     def stub_resolve_method(self, *args, **kwargs):
         pass
 
+
 def test_input_mixin_attrs():
     assert InputMixin.input_arg == "input"
     assert InputMixin.convert_enums == True
@@ -22,6 +23,7 @@ def test_input_mixin_get_input_arg():
 
     arg = AlteredInputMixin().get_input_arg()
     assert arg == "another_input"
+
 
 # def test_enum_thing?
 

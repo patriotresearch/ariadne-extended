@@ -10,12 +10,7 @@ from graphql import graphql_sync
 def test_resolver_e2e():
     class ThisResolver(Resolver):
         def retrieve(self, *args, some_arg=None, **kwargs):
-            return dict(
-                id=123,
-                name="Something named",
-                additional=some_arg,
-                comes=True
-            )
+            return dict(id=123, name="Something named", additional=some_arg, comes=True)
 
     type_defs = """
         type SomethingType {
@@ -48,7 +43,7 @@ def test_resolver_e2e():
                     comes
                 }
             }
-        """
+        """,
     )
     assert result.errors is None
     assert glom(result.data, "thing.id") == "123"

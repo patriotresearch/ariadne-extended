@@ -5,7 +5,7 @@ from ariadne import EnumType, QueryType, make_executable_schema
 from ariadne_extended.resolvers import Resolver
 from ariadne_extended.resolvers.mixins import InputMixin
 from glom import glom
-from graphql import  graphql_sync
+from graphql import graphql_sync
 
 
 def test_input_mixin_attrs():
@@ -79,7 +79,7 @@ def test_enum_input_value_resolution(mocker):
                 on: clownEmotion(input: {type: SAD})
                 off: clownEmotionOff(input: {type: SAD})
             }
-        """
+        """,
     )
     assert result.errors is None
     assert glom(result.data, "on") == "HAPPY"
