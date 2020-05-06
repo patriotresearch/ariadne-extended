@@ -76,6 +76,11 @@ def test_enum_input_value_resolution(mocker):
     assert glom(waffle, "flags.0.name") == "flag0"
     assert glom(waffle, "flags.1.name") == "flag1"
 
+    assert glom(waffle, "all.0.name") == "switch0"
+    assert glom(waffle, "all.0.__typename") == "WaffleSwitch"
+    assert glom(waffle, "all.5.name") == "flag1"
+    assert glom(waffle, "all.5.__typename") == "WaffleFlag"
+
     assert glom(waffle, "flagDefault") == False
     assert glom(waffle, "switchDefault") == False
     assert glom(waffle, "sampleDefault") == True
