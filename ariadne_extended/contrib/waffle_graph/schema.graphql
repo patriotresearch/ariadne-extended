@@ -1,0 +1,41 @@
+interface WaffleItem {
+  id: ID!
+  name: String
+  active: Boolean
+  note: String
+}
+
+type WaffleFlag implements WaffleItem {
+  id: ID!
+  name: String
+  active: Boolean
+  note: String
+}
+
+type WaffleSwitch implements WaffleItem {
+  id: ID!
+  name: String
+  active: Boolean
+  note: String
+}
+
+type WaffleSample implements WaffleItem {
+  id: ID!
+  name: String
+  active: Boolean
+  note: String
+}
+
+type Waffle {
+  flags: [WaffleFlag]
+  switches: [WaffleSwitch]
+  samples: [WaffleSample]
+  all: [WaffleItem]
+  flagDefault: Boolean
+  switchDefault: Boolean
+  sampleDefault: Boolean
+}
+
+extend type Query {
+  waffle: Waffle
+}
