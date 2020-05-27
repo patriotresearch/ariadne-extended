@@ -20,6 +20,7 @@ class GenericModelResolver(Resolver):
     queryset = None
     lookup_arg = None
     lookup_field = "pk"
+    nested_field_name = None
 
     def get_queryset(self):
         assert self.queryset is not None, (
@@ -32,14 +33,18 @@ class GenericModelResolver(Resolver):
             # Ensure queryset is re-evaluated on each request.
             queryset = queryset.all()
         if self.config.get("nested", False):
-            queryset = self.filter_nested_queryset(queryset)
+            queryset = self.filter_nested_queryset(queryset).all()
         return queryset
 
     def filter_nested_queryset(self, queryset):
         # see if we can just use the info context and the name of the resolver field
         # to reverse the relation, fallback on parent_name
         try:
-            return getattr(self.parent, self.info.field_name)
+            return getattr(
+                self.parent,
+                self.config.get("nested_field_name", self.nested_field_name)
+                or self.info.field_name,
+            )
         except AttributeError:
             params = {}
             if self.config.get("parent_name", None) == "object_id":
