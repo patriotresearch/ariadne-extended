@@ -11,4 +11,5 @@ type FieldError {
 interface Payload {
   success: Boolean
   errors: [FieldError]
+  object: Node
 }
