@@ -8,3 +8,4 @@ services:
     environment:
       POSTGRES_DB: "ariadne_extended"
       POSTGRES_USER: "${USER}"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
