@@ -8,7 +8,8 @@ jobs:
     steps:
       - name: Lint w/ Black
         uses: lgeiger/black-action@v1.0.1
-        args: ariadne_extended --check
+        with:
+          args: ariadne_extended --check
   Tests:
     needs: Linting
     runs-on: ubuntu-latest
