@@ -6,10 +6,13 @@ jobs:
   Linting:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v1
+
       - name: Lint w/ Black
         uses: lgeiger/black-action@v1.0.1
         with:
           args: ariadne_extended --check
+
   Tests:
     needs: Linting
     runs-on: ubuntu-latest
