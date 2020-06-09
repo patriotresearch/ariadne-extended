@@ -3,7 +3,14 @@ name: Main
 on: [push, pull_request]
 
 jobs:
+  Linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lint w/ Black
+        uses: lgeiger/black-action@v1.0.1
+        args: ariadne_extended --check
   Tests:
+    needs: Linting
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -32,7 +39,7 @@ jobs:
           - python-version: 3.8
             django-version: 3.0.5
             drf-version: 3.9.4
- 
+
     steps:
       - uses: actions/checkout@v1
 
