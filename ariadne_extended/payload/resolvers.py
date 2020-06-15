@@ -3,9 +3,8 @@ from copy import copy
 import humps.main as humps
 from ariadne import FallbackResolversSetter
 from graphql.type import GraphQLList, GraphQLField
-from .types import error_detail
-
-__resolvers__ = ["field_error_resolver"]
+from .types import error_detail, payload
+from rest_framework.exceptions import ErrorDetail
 
 
 @error_detail.field("error")
@@ -14,38 +13,39 @@ def resolve_error_detail_error(parent, info, *args, **kwargs):
     return str(parent)
 
 
-def resolve_field_errors(parent, info, *args, **kwargs):
-    fields = list()
+def traverse_errors(fields, node, stack=""):
 
-    def traverse(node, stack=""):
+    # Does the list contain errors or more fields?
+    if isinstance(node, list):
+        if any([isinstance(i, ErrorDetail) for i in node]):
+            stack_key = copy(stack)
+            fields.append(dict(name=humps.camelize(stack_key), values=node))
+        else:
+            for i, item in enumerate(node):
+                # if item is an empty dict, stop.
+                if item == {}:
+                    continue
+                stack_key = copy(stack)
+                stack_key = f"{stack_key}[{i}]"
+                traverse_errors(fields, item, stack_key)
+
+    # If node is a dict, use the keys
+    if isinstance(node, dict):
         for name, errors in node.items():
-            inner_stack = copy(stack)
-            if bool(inner_stack):
+            # Copy key so the ref is lost and the chain becomes unique
+            stack_key = copy(stack)
+            if bool(stack_key):
                 if isinstance(name, int):
-                    inner_stack = f"{inner_stack}[{name}]"
+                    stack_key = f"{stack_key}[{name}]"
                 else:
-                    inner_stack = f"{inner_stack}.{name}"
+                    stack_key = f"{stack_key}.{name}"
             else:
-                inner_stack = name
+                stack_key = name
+            traverse_errors(fields, errors, stack=stack_key)
 
-            if isinstance(errors, list):
-                # final condition
-                fields.append(dict(name=humps.camelize(inner_stack), values=errors))
-            else:
-                traverse(errors, stack=inner_stack)
 
-    traverse(parent["errors"])
+@payload.field("errors")
+def resolve_payload_errors(parent, info, *args, **kwargs):
+    fields = list()
+    traverse_errors(fields, parent["errors"])
     return fields
-
-
-class CustomFieldErrorResolver(FallbackResolversSetter):
-    def add_resolver_to_field(self, name: str, field_object: GraphQLField) -> None:
-        if field_object.resolve is None and name == "errors":
-            if (
-                isinstance(field_object.type, GraphQLList)
-                and field_object.type.of_type.name == "FieldError"
-            ):
-                field_object.resolve = resolve_field_errors
-
-
-field_error_resolver = CustomFieldErrorResolver()
