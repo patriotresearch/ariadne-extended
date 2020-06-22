@@ -1,3 +1,5 @@
+
+from enum import Enum
 from unittest.mock import patch, Mock
 
 from ariadne_extended.resolvers import ListModelResolver, ModelResolver, Resolver
@@ -52,3 +54,25 @@ def test_resolve_uses_retrieve_by_default(mock_retrieve, mock_initial):
     mock_initial.assert_called()
 
     assert fn == "handler called"
+
+
+class Hello(Enum):
+    HELLO = "hello"
+
+
+class TestInputMixin:
+    def test_get_input_data_with_enum_in_dict(self):
+        im = InputMixin()
+        im.operation_kwargs = {"input": {"hello": "world", "enum": Hello.HELLO}}
+
+        result = im.get_input_data()
+
+        assert result == {"hello": "world", "enum": "hello"}
+
+    def test_get_input_data_with_enum_in_list(self):
+        im = InputMixin()
+        im.operation_kwargs = {"input": [{"hello": "world", "enum": Hello.HELLO}]}
+
+        result = im.get_input_data()
+
+        assert result == [{"hello": "world", "enum": "hello"}]
