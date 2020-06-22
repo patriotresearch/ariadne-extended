@@ -112,6 +112,11 @@ class Resolver:
 
     @classonlymethod
     def as_nested_resolver(cls, **resolver_config):
+        """
+        When resolving a related type within another type. Performs needed config changes
+        to trigger nested filtering between related objects and select the correct relational field
+        from the orm when used inside a GenericModelResolver
+        """
         resolver_config["nested"] = True
         resolver = cls.as_resolver(**resolver_config)
         return resolver

@@ -1,10 +1,9 @@
 from ariadne_extended.resolvers import ListModelResolver, Resolver
-
 from waffle import get_waffle_flag_model
 from waffle.models import Sample, Switch
 from waffle.utils import get_setting
 
-from .types import waffle_item_interface, waffle_type, query
+from .types import query, waffle_item_interface, waffle_type
 
 
 class WaffleResolver(ListModelResolver):
