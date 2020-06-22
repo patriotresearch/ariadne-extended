@@ -63,11 +63,20 @@ class InputMixin:
         # May be able to be moved to a serializer save point for models?
         # As having access to the enum may be useful in other contexts
         if self.convert_enums:
-            for key, value in input_data.items():
-                if isinstance(value, enum.Enum):
-                    # Get and set actual value of enum
-                    input_data[key] = value.value
+            if isinstance(input_data, dict):
+                self.process_dict(input_data)
+
+            if isinstance(input_data, list):
+                for data in input_data:
+                    data = self.process_dict(data)
+
         return input_data
+
+    def process_dict(self, input_data):
+        for key, value in input_data.items():
+            if isinstance(value, enum.Enum):
+                # Get and set actual value of enum
+                input_data[key] = value.value
 
 
 class CreateModelMixin(InputMixin):
