@@ -68,7 +68,8 @@ class InputMixin:
 
             if isinstance(input_data, list):
                 for data in input_data:
-                    data = self.process_dict(data)
+                    if isinstance(data, dict):
+                        data = self.process_dict(data)
 
         return input_data
 

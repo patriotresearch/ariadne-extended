@@ -76,3 +76,11 @@ class TestInputMixin:
         result = im.get_input_data()
 
         assert result == [{"hello": "world", "enum": "hello"}]
+
+    def test_get_input_data_with_no_enum_in_list(self):
+        im = InputMixin()
+        im.operation_kwargs = {"input": [1, 2, 3]}
+
+        result = im.get_input_data()
+
+        assert result == [1, 2, 3]
