@@ -27,7 +27,7 @@ class Resolver:
         # TODO: info may have to be wrapped in a Request compat object to work with
         # permissions and filtering.
         self.info = info
-        self.request = info
+        self.request = getattr(info, "context", None) if info is not None else None
 
     def initial(self, info, *args, **kwargs):
         """
@@ -45,7 +45,11 @@ class Resolver:
 
         method = self.config.get("method", self.default_method)
         handler = getattr(self, method)
-        return handler(parent, *args, **kwargs)
+        try:
+            return handler(parent, *args, **kwargs)
+        except exceptions.ResolverException:
+            # TODO: tac on graphql errors?
+            return None
 
     def get_operation_args(self):
         return self._operation_args
@@ -123,6 +127,10 @@ class Resolver:
 
     @classonlymethod
     def as_reference_resolver(cls, **resolver_config):
+        """
+        When resolving via reference this enables the resolver to grab the correct reference
+        parameters from ariadne and utilize them in subsequent object lookups.
+        """
         resolver_config["reference"] = True
         resolver = cls.as_resolver(**resolver_config)
         return resolver

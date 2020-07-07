@@ -1,26 +1,26 @@
 interface WaffleItem {
-  id: ID!
+  id: ID
   name: String
   active: Boolean
   note: String
 }
 
 type WaffleFlag implements WaffleItem {
-  id: ID!
+  id: ID
   name: String
   active: Boolean
   note: String
 }
 
 type WaffleSwitch implements WaffleItem {
-  id: ID!
+  id: ID
   name: String
   active: Boolean
   note: String
 }
 
 type WaffleSample implements WaffleItem {
-  id: ID!
+  id: ID
   name: String
   active: Boolean
   note: String
@@ -31,6 +31,12 @@ type Waffle {
   switches: [WaffleSwitch]
   samples: [WaffleSample]
   all: [WaffleItem]
+  "Retrieve a flag"
+  flag(name: String): WaffleFlag
+  "Retrieve a switch"
+  switch(name: String): WaffleSwitch
+  "Retrieve a sample"
+  sample(name: String): WaffleSample
   flagDefault: Boolean
   switchDefault: Boolean
   sampleDefault: Boolean

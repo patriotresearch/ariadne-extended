@@ -3,6 +3,7 @@ from .mixins import (
     ListModelMixin,
     InputMixin,
     CreateModelMixin,
+    DetailModelMixin,
     UpdateModelMixin,
     DestroyModelMixin,
 )

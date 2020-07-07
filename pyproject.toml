@@ -1,3 +1,5 @@
+# Poetry pyproject.toml: https://python-poetry.org/docs/pyproject/
+
 [tool.poetry]
 name = "ariadne-extended"
 version = "0.1.11"
@@ -28,7 +30,7 @@ classifiers = [
 "Documentation" = "https://ariadne-extended.readthedocs.io"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 ariadne = "^0.11.0"
 pyhumps = "^1.3.1"
 django = {version = ">=2.2, <3.1"}
@@ -45,7 +47,7 @@ django = "^2.2"
 model-bakery = "^1.1.0"
 djangorestframework = "^3.11.0"
 django-filter = "^2.2.0"
-pytest = "^5.2"
+pytest = "^5.4.2"
 pytest-watch = "^4.2.0"
 pytest-runner = "^5.1"
 dj-database-url = "^0.5.0"
@@ -57,9 +59,17 @@ pytest-mock = "^3.1.0"
 glom = "^19.10.0"
 pytest-cov = "^2.8.1"
 django-waffle = "^0.20.0"
+darglint = "^1.3.1"
+isort = {extras = ["pyproject"], version = "^4.3.21"}
+pyupgrade = "^2.4.4"
+mypy = "^0.770"
+bandit = "^1.6.2"
+safety = "^1.9.0"
+ipdb = "^0.13.2"
+sphinx_rtd_theme = "^0.5.0"
 
 [tool.black]
-target-version = ['py38']
+target-version = ['py37']
 line-length = 99
 exclude = '''
 (
@@ -80,10 +90,15 @@ exclude = '''
 [tool.isort]
 multi_line_output = 3
 include_trailing_comma = true
+line_length = 99
+skip = "migrations"
+# https://github.com/timothycrosley/isort/
+known_typing = "typing,types,typing_extensions,mypy,mypy_extensions"
+sections = "FUTURE,TYPING,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+default_section = "FIRSTPARTY"
 force_grid_wrap = 0
 use_parentheses = true
-line_length = 88
-skip = "migrations"
+
 
 [build-system]
 requires = ["poetry>=0.12"]

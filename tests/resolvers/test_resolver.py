@@ -4,7 +4,26 @@ import pytest
 from ariadne import QueryType, make_executable_schema
 from ariadne_extended.resolvers import Resolver
 from glom import glom
-from graphql import graphql_sync
+from graphql import graphql_sync, GraphQLResolveInfo
+
+
+def fake_info(**kwargs):
+    bits = dict(
+        field_name="name",
+        field_nodes=[],
+        return_type="GraphQLOutputType",
+        parent_type="GraphQLObjectType",
+        path="",
+        schema="GraphQLSchema",
+        fragments=dict(),
+        root_value=dict(),
+        operation=None,
+        variable_values=None,
+        context=None,
+        # is_awaitable=lambda x: x,
+    )
+    bits.update(kwargs)
+    return GraphQLResolveInfo(**bits)
 
 
 def test_resolver_e2e():
@@ -79,7 +98,7 @@ def test_resolver_initial_args(
     mock_get_operation_kwargs.return_value = "translated_kwargs"
     mock_get_reference_kwargs.return_value = "translated_ref_kwargs"
     parent = "parent_obj"
-    info = "info_obj"
+    info = fake_info(context="request")
 
     resolver = ChildResolver(
         parent,
@@ -93,7 +112,7 @@ def test_resolver_initial_args(
     mock_get_operation_kwargs.assert_called()
 
     assert resolver.info == info
-    assert resolver.request == info
+    assert resolver.request == "request"
     assert resolver.parent == parent
     assert resolver.config == dict(test="config")
     assert resolver._operation_args == (dict(operation="args"), True)
@@ -111,7 +130,7 @@ def test_initial(mocker):
     mock_check_permissions = mocker.patch("ariadne_extended.resolvers.Resolver.check_permissions")
     mock_check_throttles = mocker.patch("ariadne_extended.resolvers.Resolver.check_throttles")
 
-    resolver_instance = ChildResolver("parent", "init_info_obj")
+    resolver_instance = ChildResolver("parent", fake_info())
     assert resolver_instance.initial("info_obj", "additional_arg", some_kwargs=True) == None
 
     mock_perf_auth.assert_called_with("info_obj")
@@ -126,11 +145,11 @@ def test_resolve(mocker):
     mock_initial = mocker.patch("ariadne_extended.resolvers.Resolver.initial")
     method_spy = mocker.spy(ChildResolver, "stub_resolve_method")
     resolver_instance = ChildResolver(
-        "parent", "init_info_obj", config=dict(method="stub_resolve_method")
+        "parent", fake_info(), config=dict(method="stub_resolve_method")
     )
 
     resolver_instance.resolve("parent", "additional_arg", some_kwargs=True)
-    mock_initial.assert_called_with("init_info_obj", "additional_arg", some_kwargs=True)
+    mock_initial.assert_called_with(fake_info(), "additional_arg", some_kwargs=True)
     method_spy.assert_called_with(resolver_instance, "parent", "additional_arg", some_kwargs=True)
 
 
@@ -141,10 +160,11 @@ def test_resolve_default(mocker):
     mock_initial = mocker.patch("ariadne_extended.resolvers.Resolver.initial")
     method_spy = mocker.spy(ChildResolver, "new_default_method")
     stub_method_spy = mocker.spy(ChildResolver, "stub_resolve_method")
-    resolver_instance = ChildResolver("parent", "init_info_obj")
+
+    resolver_instance = ChildResolver("parent", fake_info())
 
     resolver_instance.resolve("parent", "additional_arg", some_kwargs=True)
-    mock_initial.assert_called_with("init_info_obj", "additional_arg", some_kwargs=True)
+    mock_initial.assert_called_with(fake_info(), "additional_arg", some_kwargs=True)
     method_spy.assert_called_with(resolver_instance, "parent", "additional_arg", some_kwargs=True)
     stub_method_spy.assert_not_called()
 
