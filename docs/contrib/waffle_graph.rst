@@ -16,6 +16,7 @@ To include the waffle schema and resolvers in your app simply add the `waffle_gr
 .. code-block:: python
 
     INSTALLED_APPS = (
+        "waffle",
         "ariadne_extended.graph_loader",
         ...
         "ariadne_extended.contrib.waffle_graph"

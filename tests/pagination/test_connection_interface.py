@@ -25,7 +25,7 @@ class SomethingResolver(RelayModelMixin, GenericModelResolver):
 
 
 @pytest.mark.django_db
-def test_enum_input_value_resolution(mocker):
+def test_connection_interface(mocker):
 
     type_defs = """
         type Something implements Node {
