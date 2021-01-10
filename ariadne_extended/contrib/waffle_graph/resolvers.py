@@ -9,10 +9,8 @@ from .types import query, waffle_item_interface, waffle_type
 class WaffleResolver(DetailModelMixin, ListModelResolver):
     lookup_arg = "name"
     lookup_field = "name"
-    default_setting = None
 
     def get_object(self):
-        # get_setting(self.default_setting)
         lookup = self.get_lookup_filter_kwargs()
         # Waffle model get returns an empty class if not found with the used lookup name
         return self.model.get(**lookup)
@@ -24,17 +22,14 @@ class WaffleResolver(DetailModelMixin, ListModelResolver):
 
 class FlagResolver(WaffleResolver):
     model = get_waffle_flag_model()
-    default_setting = "FLAG_DEFAULT"
 
 
 class SwitchResolver(WaffleResolver):
     model = Switch
-    default_setting = "SWITCH_DEFAULT"
 
 
 class SampleResolver(WaffleResolver):
     model = Sample
-    default_setting = "SAMPLE_DEFAULT"
 
 
 class AllWaffleTypesResolver(Resolver):

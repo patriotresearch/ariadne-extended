@@ -110,6 +110,9 @@ def test_singular_waffle_resolvers_resolution(mocker):
                 flag(name: "flag0") {
                     ...BaseWaffleItem
                 }
+                non_existant_flag: flag(name: "flag123") {
+                    ...BaseWaffleItem
+                }
                 switch(name: "switch1") {
                     ...BaseWaffleItem
                 }
@@ -131,6 +134,7 @@ def test_singular_waffle_resolvers_resolution(mocker):
     waffle = result.data.get("waffle")
 
     assert glom(waffle, "flag.active") is False
+    assert glom(waffle, "non_existant_flag.active") is False
     assert isinstance(glom(waffle, "flag.id"), str)
     assert glom(waffle, "switch.active") is True
     assert isinstance(glom(waffle, "switch.id"), str)
