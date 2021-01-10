@@ -2,7 +2,6 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.db import models
 
 from ..filters import FilterMixin
-from . import exceptions
 from .abc import Resolver
 from .mixins import (
     CreateModelMixin,

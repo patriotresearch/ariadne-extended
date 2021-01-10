@@ -1,6 +1,5 @@
 from enum import Enum
 
-import pytest
 from ariadne import EnumType, QueryType, make_executable_schema
 from ariadne_extended.resolvers import Resolver
 from ariadne_extended.resolvers.mixins import InputMixin
@@ -10,7 +9,7 @@ from graphql import graphql_sync
 
 def test_input_mixin_attrs():
     assert InputMixin.input_arg == "input"
-    assert InputMixin.convert_enums == True
+    assert InputMixin.convert_enums is True
 
 
 def test_input_mixin_get_input_arg():

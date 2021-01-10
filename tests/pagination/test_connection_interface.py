@@ -1,18 +1,14 @@
-from enum import Enum
-
 import pytest
-from ariadne import EnumType, QueryType, make_executable_schema
+from ariadne import QueryType, make_executable_schema
 from ariadne_extended.cursor_pagination import RelayModelMixin
 from ariadne_extended.resolvers.model import GenericModelResolver
-from graphql import graphql_sync
 from django.apps import apps
+from graphql import graphql_sync
 from model_bakery import baker
 
+from .models import Something
 
 config = apps.get_app_config("graph_loader")
-
-
-from .models import Something
 
 
 class SomethingResolver(RelayModelMixin, GenericModelResolver):

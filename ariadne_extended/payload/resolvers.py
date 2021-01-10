@@ -1,8 +1,6 @@
 from copy import copy
 
 import humps.main as humps
-from ariadne import FallbackResolversSetter
-from graphql.type import GraphQLList, GraphQLField
 from .types import error_detail, payload
 from rest_framework.exceptions import ErrorDetail
 

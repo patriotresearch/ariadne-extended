@@ -1,6 +1,5 @@
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
-import pytest
 from ariadne import QueryType, make_executable_schema
 from ariadne_extended.resolvers import Resolver
 from glom import glom
@@ -68,7 +67,7 @@ def test_resolver_e2e():
     assert glom(result.data, "thing.id") == "123"
     assert glom(result.data, "thing.name") == "Something named"
     assert glom(result.data, "thing.additional") == "This Way"
-    assert glom(result.data, "thing.comes") == True
+    assert glom(result.data, "thing.comes") is True
 
 
 class ChildResolver(Resolver):
@@ -131,7 +130,7 @@ def test_initial(mocker):
     mock_check_throttles = mocker.patch("ariadne_extended.resolvers.Resolver.check_throttles")
 
     resolver_instance = ChildResolver("parent", fake_info())
-    assert resolver_instance.initial("info_obj", "additional_arg", some_kwargs=True) == None
+    assert resolver_instance.initial("info_obj", "additional_arg", some_kwargs=True) is None
 
     mock_perf_auth.assert_called_with("info_obj")
     mock_check_permissions.assert_called_with("info_obj")
@@ -205,7 +204,7 @@ def test_as_nested_resolver(mock_as_resolver):
     """
     Calls `as_resolver` with nested config kwarg
     """
-    resolver = ChildResolver.as_nested_resolver(additional_kwargs=True)
+    ChildResolver.as_nested_resolver(additional_kwargs=True)
     mock_as_resolver.assert_called_with(nested=True, additional_kwargs=True)
 
 
@@ -214,7 +213,7 @@ def test_as_reference_resolver(mock_as_resolver):
     """
     Calls `as_resolver` with reference config kwarg
     """
-    resolver = ChildResolver.as_reference_resolver(additional_kwargs=True)
+    ChildResolver.as_reference_resolver(additional_kwargs=True)
     mock_as_resolver.assert_called_with(reference=True, additional_kwargs=True)
 
 

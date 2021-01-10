@@ -7,7 +7,6 @@ from . import exceptions
 
 
 class Resolver:
-
     permission_classes = []
     throttle_classes = []
     authentication_classes = []
@@ -166,7 +165,7 @@ class Resolver:
             durations = [duration for duration in throttle_durations if duration is not None]
 
             duration = max(durations, default=None)
-            self.throttled(request, duration)
+            self.throttled(self.request, duration)
 
     def perform_authentication(self, info):
         """

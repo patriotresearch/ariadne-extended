@@ -1,5 +1,5 @@
 from enum import Enum
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 from ariadne_extended.resolvers import ListModelResolver, ModelResolver, Resolver
 from ariadne_extended.resolvers.mixins import InputMixin
@@ -12,7 +12,7 @@ class ChildResolver(Resolver):
 
 def test_input_mixin_attrs():
     assert InputMixin.input_arg == "input"
-    assert InputMixin.convert_enums == True
+    assert InputMixin.convert_enums is True
 
 
 def test_input_mixin_get_input_arg():

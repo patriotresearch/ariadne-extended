@@ -1,9 +1,7 @@
-from enum import Enum
-
 import pytest
 from ariadne import make_executable_schema
 from django.apps import apps
-from glom import Path, glom
+from glom import glom
 from graphql import graphql_sync
 from model_bakery import baker
 from waffle import get_waffle_flag_model
@@ -65,12 +63,12 @@ def test_waffle_resolvers_resolution(mocker):
     assert result.errors is None
     waffle = result.data.get("waffle")
 
-    assert glom(waffle, "flags.0.active") == False
-    assert glom(waffle, "flags.1.active") == True
-    assert glom(waffle, "switches.0.active") == False
-    assert glom(waffle, "switches.1.active") == True
-    assert glom(waffle, "samples.0.active") == True
-    assert glom(waffle, "samples.1.active") == True
+    assert glom(waffle, "flags.0.active") is False
+    assert glom(waffle, "flags.1.active") is True
+    assert glom(waffle, "switches.0.active") is False
+    assert glom(waffle, "switches.1.active") is True
+    assert glom(waffle, "samples.0.active") is True
+    assert glom(waffle, "samples.1.active") is True
 
     assert glom(waffle, "flags.0.name") == "flag0"
     assert glom(waffle, "flags.1.name") == "flag1"
@@ -80,9 +78,9 @@ def test_waffle_resolvers_resolution(mocker):
     assert glom(waffle, "all.5.name") == "flag1"
     assert glom(waffle, "all.5.__typename") == "WaffleFlag"
 
-    assert glom(waffle, "flagDefault") == False
-    assert glom(waffle, "switchDefault") == False
-    assert glom(waffle, "sampleDefault") == True
+    assert glom(waffle, "flagDefault") is False
+    assert glom(waffle, "switchDefault") is False
+    assert glom(waffle, "sampleDefault") is True
 
 
 @pytest.mark.django_db
@@ -132,12 +130,12 @@ def test_singular_waffle_resolvers_resolution(mocker):
     assert result.errors is None
     waffle = result.data.get("waffle")
 
-    assert glom(waffle, "flag.active") == False
+    assert glom(waffle, "flag.active") is False
     assert isinstance(glom(waffle, "flag.id"), str)
-    assert glom(waffle, "switch.active") == True
+    assert glom(waffle, "switch.active") is True
     assert isinstance(glom(waffle, "switch.id"), str)
     # Sample defaults to True if it doesn't exist from setting
-    assert glom(waffle, "sample.active") == True
+    assert glom(waffle, "sample.active") is True
     assert glom(waffle, "sample.id") is None
 
     assert glom(waffle, "flag.name") == "flag0"
