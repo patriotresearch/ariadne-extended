@@ -27,6 +27,8 @@ Run your migrations and check the django admin, add a flag and run some queries.
 Schema
 ======
 
+Once added to your installed apps, these types and extensions will become available for use within your own graphql schema and queries.
+
 .. literalinclude:: ../../ariadne_extended/contrib/waffle_graph/schema.graphql
 
 Resolvers

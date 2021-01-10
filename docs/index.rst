@@ -6,12 +6,12 @@ Welcome to Ariadne Extended documentation!
    :caption: Contents:
 
    installation
+   concepts
+   resolvers
    usage
-   modules
    contrib/index
    contributing
    authors
-   history
    utils
 
 Indices and tables
