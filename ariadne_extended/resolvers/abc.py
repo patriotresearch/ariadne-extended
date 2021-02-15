@@ -26,21 +26,25 @@ class Resolver:
         # TODO: info may have to be wrapped in a Request compat object to work with
         # permissions and filtering.
         self.info = info
-        self.request = getattr(info, "context", None) if info is not None else None
+        self.request = self.get_request(info)
 
-    def initial(self, info, *args, **kwargs):
+    def get_request(self, info):
+        context = getattr(info, "context", {})
+        return context.get("request", None)
+
+    def initial(self, request, *args, **kwargs):
         """
         Runs anything that needs to occur prior to calling the operation handler
         """
-        self.perform_authentication(info)
-        self.check_permissions(info)
-        self.check_throttles(info)
+        self.perform_authentication(request)
+        self.check_permissions(request)
+        self.check_throttles(request)
 
     def resolve(self, parent, *args, **kwargs):
         """
         Run initial checks, then call the default or configured operation resolve handler
         """
-        self.initial(self.info, *args, **kwargs)
+        self.initial(self.request, *args, **kwargs)
 
         method = self.config.get("method", self.default_method)
         handler = getattr(self, method)
@@ -95,7 +99,7 @@ class Resolver:
         """
         Extra context provided to the serializer class.
         """
-        return {"request": self.info, "format": None, "view": self}
+        return {"request": self.request, "format": None, "view": self}
 
     @classonlymethod
     def as_resolver(cls, **resolver_config):
@@ -134,29 +138,29 @@ class Resolver:
         resolver = cls.as_resolver(**resolver_config)
         return resolver
 
-    def permission_denied(self, info, message=None):
+    def permission_denied(self, request, message=None):
         """
         If resolution is not permitted, determine what kind of exception to raise.
         """
         raise exceptions.PermissionDenied(message)
 
-    def check_object_permissions(self, info, obj):
+    def check_object_permissions(self, request, obj):
         """
         Check if the resolution should be permitted for a given object.
         Raises an appropriate exception if the request is not permitted.
         """
         for permission in self.get_permissions():
-            if not permission.has_object_permission(info, self, obj):
-                self.permission_denied(info, message=getattr(permission, "message", None))
+            if not permission.has_object_permission(request, self, obj):
+                self.permission_denied(request, message=getattr(permission, "message", None))
 
-    def check_throttles(self, info):
+    def check_throttles(self, request):
         """
         Check if resolution should be throttled.
         Raises an appropriate exception if the resolution is throttled.
         """
         throttle_durations = []
         for throttle in self.get_throttles():
-            if not throttle.allow_request(info, self):
+            if not throttle.allow_request(request, self):
                 throttle_durations.append(throttle.wait())
 
         if throttle_durations:
@@ -167,7 +171,7 @@ class Resolver:
             duration = max(durations, default=None)
             self.throttled(self.request, duration)
 
-    def perform_authentication(self, info):
+    def perform_authentication(self, request):
         """
         Perform authentication on the incoming resolution.
 
@@ -177,14 +181,14 @@ class Resolver:
         """
         pass
 
-    def check_permissions(self, info):
+    def check_permissions(self, request):
         """
         Check if the resolution should be permitted.
         Raises an appropriate exception if the resolution is not permitted.
         """
         for permission in self.get_permissions():
-            if not permission.has_permission(info, self):
-                self.permission_denied(info, message=getattr(permission, "message", None))
+            if not permission.has_permission(request, self):
+                self.permission_denied(request, message=getattr(permission, "message", None))
 
     def get_authenticators(self):
         """

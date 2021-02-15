@@ -145,7 +145,7 @@ class DetailModelMixin:
 
         # May raise a permission denied
         if obj:
-            self.check_object_permissions(self.info, obj)
+            self.check_object_permissions(self.request, obj)
 
         return obj
 
