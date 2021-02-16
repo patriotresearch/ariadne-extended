@@ -1,13 +1,17 @@
+import pytest
 from unittest.mock import patch
 
-from ariadne import QueryType, make_executable_schema
+from ariadne import QueryType, make_executable_schema, graphql_sync
 from ariadne_extended.resolvers import Resolver
 from glom import glom
-from graphql import graphql_sync, GraphQLResolveInfo
+from graphql import GraphQLResolveInfo
 
 
-def fake_info(**kwargs):
-    bits = dict(
+@pytest.fixture
+def info_fixture():
+    # request = kwargs.pop("request", None)
+    request = "request"
+    info_config = dict(
         field_name="name",
         field_nodes=[],
         return_type="GraphQLOutputType",
@@ -18,11 +22,10 @@ def fake_info(**kwargs):
         root_value=dict(),
         operation=None,
         variable_values=None,
-        context=None,
-        # is_awaitable=lambda x: x,
+        context=dict(request=request),
     )
-    bits.update(kwargs)
-    return GraphQLResolveInfo(**bits)
+    # info_config.update(kwargs)
+    return GraphQLResolveInfo(**info_config)
 
 
 def test_resolver_e2e():
@@ -50,9 +53,10 @@ def test_resolver_e2e():
     resolvers = [query]
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql_sync(
+    _, result = graphql_sync(
         schema,
-        """
+        dict(
+            query="""
             query {
                 thing: getThing(someArg: "This Way") {
                     id
@@ -61,13 +65,16 @@ def test_resolver_e2e():
                     comes
                 }
             }
-        """,
+        """
+        ),
+        context_value=dict(request="request"),
     )
-    assert result.errors is None
-    assert glom(result.data, "thing.id") == "123"
-    assert glom(result.data, "thing.name") == "Something named"
-    assert glom(result.data, "thing.additional") == "This Way"
-    assert glom(result.data, "thing.comes") is True
+
+    assert result.get("errors", None) is None
+    assert glom(result["data"], "thing.id") == "123"
+    assert glom(result["data"], "thing.name") == "Something named"
+    assert glom(result["data"], "thing.additional") == "This Way"
+    assert glom(result["data"], "thing.comes") is True
 
 
 class ChildResolver(Resolver):
@@ -91,17 +98,16 @@ def test_attrs():
 @patch("ariadne_extended.resolvers.Resolver.get_operation_kwargs")
 @patch("ariadne_extended.resolvers.Resolver.get_reference_kwargs")
 def test_resolver_initial_args(
-    mock_get_reference_kwargs, mock_get_operation_kwargs, mock_get_operation_args
+    mock_get_reference_kwargs, mock_get_operation_kwargs, mock_get_operation_args, info_fixture
 ):
     mock_get_operation_args.return_value = "translated_args"
     mock_get_operation_kwargs.return_value = "translated_kwargs"
     mock_get_reference_kwargs.return_value = "translated_ref_kwargs"
     parent = "parent_obj"
-    info = fake_info(context="request")
 
     resolver = ChildResolver(
         parent,
-        info,
+        info_fixture,
         {"operation": "args"},
         True,
         config=dict(test="config"),
@@ -110,7 +116,7 @@ def test_resolver_initial_args(
 
     mock_get_operation_kwargs.assert_called()
 
-    assert resolver.info == info
+    assert resolver.info == info_fixture
     assert resolver.request == "request"
     assert resolver.parent == parent
     assert resolver.config == dict(test="config")
@@ -121,7 +127,7 @@ def test_resolver_initial_args(
     assert resolver.reference_kwargs == "translated_ref_kwargs"
 
 
-def test_initial(mocker):
+def test_initial(mocker, info_fixture):
     """
     Initial method gets passed handler args and kwargs and checks different
     """
@@ -129,30 +135,38 @@ def test_initial(mocker):
     mock_check_permissions = mocker.patch("ariadne_extended.resolvers.Resolver.check_permissions")
     mock_check_throttles = mocker.patch("ariadne_extended.resolvers.Resolver.check_throttles")
 
-    resolver_instance = ChildResolver("parent", fake_info())
-    assert resolver_instance.initial("info_obj", "additional_arg", some_kwargs=True) is None
+    resolver_instance = ChildResolver("parent", info_fixture)
 
-    mock_perf_auth.assert_called_with("info_obj")
-    mock_check_permissions.assert_called_with("info_obj")
-    mock_check_throttles.assert_called_with("info_obj")
+    assert (
+        resolver_instance.initial(
+            info_fixture.context["request"], "additional_arg", some_kwargs=True
+        )
+        is None
+    )
+    mock_perf_auth.assert_called_with(info_fixture.context["request"])
+    mock_check_permissions.assert_called_with(info_fixture.context["request"])
+    mock_check_throttles.assert_called_with(info_fixture.context["request"])
 
 
-def test_resolve(mocker):
+def test_resolve(mocker, info_fixture):
     """
     Uses configuration resolver handler method if present
     """
     mock_initial = mocker.patch("ariadne_extended.resolvers.Resolver.initial")
     method_spy = mocker.spy(ChildResolver, "stub_resolve_method")
+
     resolver_instance = ChildResolver(
-        "parent", fake_info(), config=dict(method="stub_resolve_method")
+        "parent", info_fixture, config=dict(method="stub_resolve_method")
     )
 
     resolver_instance.resolve("parent", "additional_arg", some_kwargs=True)
-    mock_initial.assert_called_with(fake_info(), "additional_arg", some_kwargs=True)
+    mock_initial.assert_called_with(
+        info_fixture.context["request"], "additional_arg", some_kwargs=True
+    )
     method_spy.assert_called_with(resolver_instance, "parent", "additional_arg", some_kwargs=True)
 
 
-def test_resolve_default(mocker):
+def test_resolve_default(mocker, info_fixture):
     """
     Falls back on default resolver handler method if none specified
     """
@@ -160,10 +174,12 @@ def test_resolve_default(mocker):
     method_spy = mocker.spy(ChildResolver, "new_default_method")
     stub_method_spy = mocker.spy(ChildResolver, "stub_resolve_method")
 
-    resolver_instance = ChildResolver("parent", fake_info())
-
+    resolver_instance = ChildResolver("parent", info_fixture)
     resolver_instance.resolve("parent", "additional_arg", some_kwargs=True)
-    mock_initial.assert_called_with(fake_info(), "additional_arg", some_kwargs=True)
+
+    mock_initial.assert_called_with(
+        info_fixture.context["request"], "additional_arg", some_kwargs=True
+    )
     method_spy.assert_called_with(resolver_instance, "parent", "additional_arg", some_kwargs=True)
     stub_method_spy.assert_not_called()
 

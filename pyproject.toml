@@ -103,5 +103,8 @@ python_files = "tests.py test_*.py *_tests.py"
 django_find_project = false
 
 [build-system]
-requires = ["poetry>=1.1"]
+requires = [
+    "poetry>=1.1",
+    "setuptools!=50.0",
+]
 build-backend = "poetry.masonry.api"

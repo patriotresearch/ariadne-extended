@@ -1,10 +1,11 @@
 from enum import Enum
 
+import pytest
 from ariadne import EnumType, QueryType, make_executable_schema
 from ariadne_extended.resolvers import Resolver
 from ariadne_extended.resolvers.mixins import InputMixin
 from glom import glom
-from graphql import graphql_sync
+from tests.utils import run_graphql
 
 
 def test_input_mixin_attrs():
@@ -23,6 +24,7 @@ def test_input_mixin_get_input_arg():
     assert arg == "another_input"
 
 
+@pytest.mark.django_db
 def test_enum_input_value_resolution(mocker):
     class ClownTypes(Enum):
         SAD = "Sad Clown"
@@ -71,15 +73,19 @@ def test_enum_input_value_resolution(mocker):
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql_sync(
+    result = run_graphql(
         schema,
-        """
-            query {
-                on: clownEmotion(input: {type: SAD})
-                off: clownEmotionOff(input: {type: SAD})
-            }
-        """,
+        dict(
+            query="""
+                query {
+                    on: clownEmotion(input: {type: SAD})
+                    off: clownEmotionOff(input: {type: SAD})
+                }
+            """,
+            variables={},
+        ),
     )
-    assert result.errors is None
-    assert glom(result.data, "on") == "HAPPY"
-    assert glom(result.data, "off") == "HAPPY"
+    assert result.get("errors", None) is None
+    data = result["data"]
+    assert glom(data, "on") == "HAPPY"
+    assert glom(data, "off") == "HAPPY"

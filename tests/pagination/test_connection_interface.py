@@ -3,7 +3,7 @@ from ariadne import QueryType, make_executable_schema
 from ariadne_extended.cursor_pagination import RelayModelMixin
 from ariadne_extended.resolvers.model import GenericModelResolver
 from django.apps import apps
-from graphql import graphql_sync
+from tests.utils import run_graphql
 from model_bakery import baker
 
 from .models import Something
@@ -52,9 +52,10 @@ def test_connection_interface(mocker):
     for i in range(20):
         baker.make(Something, name="st%s" % i)
 
-    result = graphql_sync(
+    result = run_graphql(
         schema,
-        """
+        dict(
+            query="""
             query {
                 things(first: 5) {
                     pageInfo {
@@ -75,10 +76,11 @@ def test_connection_interface(mocker):
                     }
                 }
             }
-        """,
+        """
+        ),
     )
-    assert result.errors is None
-    assert result.data == dict(
+    assert result.get("errors", None) is None
+    assert result.get("data", {}) == dict(
         things=dict(
             pageInfo=dict(
                 hasNextPage=True,

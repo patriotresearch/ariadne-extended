@@ -2,10 +2,10 @@ import pytest
 from ariadne import make_executable_schema
 from django.apps import apps
 from glom import glom
-from graphql import graphql_sync
 from model_bakery import baker
 from waffle import get_waffle_flag_model
 from waffle.models import Sample, Switch
+from tests.utils import run_graphql
 
 config = apps.get_app_config("graph_loader")
 
@@ -29,9 +29,10 @@ def test_waffle_resolvers_resolution(mocker):
     for i in range(2):
         baker.make(Sample, name="sample%s" % i, percent="100", note="a sample")
 
-    result = graphql_sync(
+    result = run_graphql(
         schema,
-        """
+        dict(
+            query="""
         query {
             waffle {
                 flags {
@@ -58,10 +59,11 @@ def test_waffle_resolvers_resolution(mocker):
             active
             note
         }
-        """,
+        """
+        ),
     )
-    assert result.errors is None
-    waffle = result.data.get("waffle")
+    assert result.get("errors", None) is None
+    waffle = result.get("data", {}).get("waffle")
 
     assert glom(waffle, "flags.0.active") is False
     assert glom(waffle, "flags.1.active") is True
@@ -102,9 +104,10 @@ def test_singular_waffle_resolvers_resolution(mocker):
     for i in range(2):
         baker.make(Sample, name="sample%s" % i, percent="100", note="a sample")
 
-    result = graphql_sync(
+    result = run_graphql(
         schema,
-        """
+        dict(
+            query="""
         query {
             waffle {
                 flag(name: "flag0") {
@@ -128,10 +131,11 @@ def test_singular_waffle_resolvers_resolution(mocker):
             active
             note
         }
-        """,
+        """
+        ),
     )
-    assert result.errors is None
-    waffle = result.data.get("waffle")
+    assert result.get("errors", None) is None
+    waffle = result.get("data", {}).get("waffle")
 
     assert glom(waffle, "flag.active") is False
     assert glom(waffle, "non_existant_flag.active") is False

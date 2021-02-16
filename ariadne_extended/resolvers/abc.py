@@ -13,20 +13,25 @@ class Resolver:
     default_method = "retrieve"
 
     def __init__(self, parent, info, *operation_args, config=dict(), **operation_kwargs):
-        # arguments used for this specific operation on the resolver
+        # config is used for this specific operation on the resolver
         self.config = config.copy()
-        self._operation_args = operation_args
-        self._operation_kwargs = operation_kwargs
-        self.operation_args = self.get_operation_args()
-        self.operation_kwargs = self.get_operation_kwargs()
-        # normalize federation reference args from ariadne
-        self.reference_kwargs = self.get_reference_kwargs()
+        # Graphql info object stored for access
+        self.info = info
+        # Get request from graphql info by default
+        self.request = self.get_request(info)
+        # Store parent for access
         self.parent = parent
 
-        # TODO: info may have to be wrapped in a Request compat object to work with
-        # permissions and filtering.
-        self.info = info
-        self.request = self.get_request(info)
+        # Store unproccessed resolver args and kwargs
+        self._operation_args = operation_args
+        self._operation_kwargs = operation_kwargs
+
+        # process resolver args and kwargs if needed
+        self.operation_args = self.get_operation_args()
+        self.operation_kwargs = self.get_operation_kwargs()
+
+        # normalize federation reference args from ariadne
+        self.reference_kwargs = self.get_reference_kwargs()
 
     def get_request(self, info):
         context = getattr(info, "context", {})
@@ -65,7 +70,7 @@ class Resolver:
 
     def get_reference_kwargs(self):
         if self.config.get("reference", False):
-            return humps.decamelize(self.operation_args[0])
+            return humps.decamelize(self.parent)
         else:
             return dict()
 

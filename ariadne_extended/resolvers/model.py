@@ -17,6 +17,7 @@ class GenericModelResolver(Resolver):
     """
 
     queryset = None
+    model = None
     nested_field_name = None
 
     def get_queryset(self):
@@ -32,6 +33,12 @@ class GenericModelResolver(Resolver):
         if self.config.get("nested", False):
             queryset = self.filter_nested_queryset(queryset).all()
         return queryset
+
+    def get_model(self):
+        if self.model is not None:
+            return self.model
+        else:
+            return self.get_queryset().model
 
     def filter_nested_queryset(self, queryset):
         # see if we can just use the info context and the name of the resolver field
