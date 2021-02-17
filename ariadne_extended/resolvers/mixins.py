@@ -154,7 +154,7 @@ class DetailModelMixin:
         return self.get_object()
 
 
-class UpdateModelMixin(DetailModelMixin):
+class UpdateModelMixin(InputMixin, DetailModelMixin):
     """
     Update a model instance.
     """
