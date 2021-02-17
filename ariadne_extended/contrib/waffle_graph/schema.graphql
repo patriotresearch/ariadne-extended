@@ -37,8 +37,11 @@ type Waffle {
   switch(name: String): WaffleSwitch
   "Retrieve a sample"
   sample(name: String): WaffleSample
+  "The default flag value as specified in the settings"
   flagDefault: Boolean
+  "The default switch value as specified in the settings"
   switchDefault: Boolean
+  "The default sample value as specified in the settings"
   sampleDefault: Boolean
 }
 
