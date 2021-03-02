@@ -21,7 +21,7 @@ class FilterMixin:
         default queryset.
         """
         for backend in list(self.filter_backends):
-            queryset = backend().filter_queryset(self.info, queryset, self)
+            queryset = backend().filter_queryset(self.request, queryset, self)
         return queryset
 
     def get_filter_data(self):
