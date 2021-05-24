@@ -22,7 +22,7 @@ jobs:
       matrix:
         python-version: [3.8]
         django-version: [2.2.23, 3.1.11]
-        drf-version: [3.11.4, 3.12.1]
+        drf-version: [3.11.2, 3.12.1]
 
     steps:
       - uses: actions/checkout@v1
