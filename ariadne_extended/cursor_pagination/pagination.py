@@ -87,8 +87,8 @@ class InternalPaginator:
 
         self.ordering = ordering
 
-        if not all(o.startswith("-") for o in ordering) and not all(
-            not o.startswith("-") for o in ordering
+        if not all(o.startswith("-") for o in ordering) and any(
+            o.startswith("-") for o in ordering
         ):
             raise InvalidCursor("Direction of orderings must match")
 
@@ -143,8 +143,7 @@ class InternalPaginator:
             raise InvalidCursor(self.invalid_cursor_message)
 
     def encode_cursor(self, position):
-        encoded = b64encode(self.delimiter.join(position).encode("utf8")).decode("ascii")
-        return encoded
+        return b64encode(self.delimiter.join(position).encode("utf8")).decode("ascii")
 
     def position_from_instance(self, instance):
         position = []

@@ -14,7 +14,7 @@ def resolve_error_detail_error(parent, info, *args, **kwargs):
 def traverse_errors(fields, node, stack=""):
     # Does the list contain errors or more fields?
     if isinstance(node, list):
-        if any([isinstance(i, ErrorDetail) for i in node]):
+        if any(isinstance(i, ErrorDetail) for i in node):
             stack_key = copy(stack)
             fields.append(dict(name=humps.camelize(stack_key), values=node))
         else:

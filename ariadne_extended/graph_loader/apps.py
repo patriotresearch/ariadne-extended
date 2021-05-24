@@ -17,9 +17,9 @@ class GraphLoaderConfig(AppConfig):
 
     def ready(self):
         # Find all schema.graphql and resolver modules and load them
-        self.type_defs = list()
-        self.types = list()
-        self.resolvers = list()
+        self.type_defs = []
+        self.types = []
+        self.resolvers = []
 
         logger.debug("Trying to load resolvers and schemas:")
         for config in apps.get_app_configs():
@@ -27,7 +27,7 @@ class GraphLoaderConfig(AppConfig):
             self.load_resolvers(config)
             self.load_custom_types(config)
 
-        logger.debug("Types: %s", ", ".join([_type.name for _type in self.types]))
+        logger.debug("Types: %s", ", ".join(_type.name for _type in self.types))
 
     def load_schema(self, config):
         try:
@@ -59,10 +59,7 @@ class GraphLoaderConfig(AppConfig):
             for type_name in [
                 t
                 for _, t in types_module.__dict__.items()
-                if isinstance(t, ObjectType)
-                or isinstance(t, ScalarType)
-                or isinstance(t, EnumType)
-                or isinstance(t, UnionType)
+                if isinstance(t, (ObjectType, ScalarType, EnumType, UnionType))
             ]:
                 self.types.append(type_name)
         except ModuleNotFoundError as e:

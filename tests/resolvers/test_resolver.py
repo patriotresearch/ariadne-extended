@@ -23,6 +23,7 @@ def info_fixture():
         operation=None,
         variable_values=None,
         context=dict(request=request),
+        is_awaitable=False
     )
     # info_config.update(kwargs)
     return GraphQLResolveInfo(**info_config)

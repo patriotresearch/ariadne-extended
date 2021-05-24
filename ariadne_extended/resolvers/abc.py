@@ -22,7 +22,7 @@ class Resolver:
         # Store parent for access
         self.parent = parent
 
-        # Store unproccessed resolver args and kwargs
+        # Store unprocessed resolver args and kwargs
         self._operation_args = operation_args
         self._operation_kwargs = operation_kwargs
 
@@ -130,8 +130,7 @@ class Resolver:
         from the orm when used inside a GenericModelResolver
         """
         resolver_config["nested"] = True
-        resolver = cls.as_resolver(**resolver_config)
-        return resolver
+        return cls.as_resolver(**resolver_config)
 
     @classonlymethod
     def as_reference_resolver(cls, **resolver_config):
@@ -140,8 +139,7 @@ class Resolver:
         parameters from ariadne and utilize them in subsequent object lookups.
         """
         resolver_config["reference"] = True
-        resolver = cls.as_resolver(**resolver_config)
-        return resolver
+        return cls.as_resolver(**resolver_config)
 
     def permission_denied(self, request, message=None):
         """
@@ -163,10 +161,11 @@ class Resolver:
         Check if resolution should be throttled.
         Raises an appropriate exception if the resolution is throttled.
         """
-        throttle_durations = []
-        for throttle in self.get_throttles():
-            if not throttle.allow_request(request, self):
-                throttle_durations.append(throttle.wait())
+        throttle_durations = [
+            throttle.wait()
+            for throttle in self.get_throttles()
+            if not throttle.allow_request(request, self)
+        ]
 
         if throttle_durations:
             # Filter out `None` values which may happen in case of config / rate
