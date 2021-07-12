@@ -3,11 +3,13 @@ from functools import update_wrapper
 import humps.main as humps
 from django.utils.decorators import classonlymethod
 
+from ariadne_extended.settings import api_settings
+
 from . import exceptions
 
 
 class Resolver:
-    permission_classes = []
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES
     throttle_classes = []
     authentication_classes = []
     default_method = "retrieve"
