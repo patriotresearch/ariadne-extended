@@ -18,7 +18,9 @@ from django.utils.module_loading import import_string
 
 
 DEFAULTS = {
-    "DEFAULT_PERMISSION_CLASSES": ["ariadne_extended.permissions.AllowAny",],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "ariadne_extended.permissions.AllowAny",
+    ],
 }
 
 
