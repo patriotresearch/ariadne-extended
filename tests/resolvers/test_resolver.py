@@ -6,6 +6,8 @@ from ariadne_extended.resolvers import Resolver
 from glom import glom
 from graphql import GraphQLResolveInfo
 
+from ariadne_extended.permissions import AllowAny
+
 
 @pytest.fixture
 def info_fixture():
@@ -89,7 +91,7 @@ class ChildResolver(Resolver):
 
 
 def test_attrs():
-    assert Resolver.permission_classes == []
+    assert Resolver.permission_classes == [AllowAny]
     assert Resolver.throttle_classes == []
     assert Resolver.authentication_classes == []
     assert Resolver.default_method == "retrieve"
