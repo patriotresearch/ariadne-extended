@@ -1,14 +1,14 @@
 type ErrorDetail {
-  error: String
-  code: String
+  error: String!
+  code: String!
 }
 
 type FieldError {
-  name: String
-  values: [ErrorDetail]
+  name: String!
+  values: [ErrorDetail!]!
 }
 
 interface Payload {
-  success: Boolean
-  errors: [FieldError]
+  success: Boolean!
+  errors: [FieldError!]!
 }
