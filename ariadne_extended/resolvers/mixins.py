@@ -85,11 +85,7 @@ class CreateModelMixin(InputMixin):
     def create(self, parent, *args, **kwargs):
         serializer = self.get_serializer(data=self.get_input_data())
         valid = serializer.is_valid(raise_exception=False)
-        if valid:
-            obj = self.perform_create(serializer)
-        else:
-            # This will break shit
-            obj = None
+        obj = self.perform_create(serializer) if valid else None
         return dict(success=valid, object=obj, errors=serializer.errors)
 
     def perform_create(self, serializer):

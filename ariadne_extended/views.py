@@ -8,12 +8,7 @@ from ariadne.graphql import graphql_sync
 from ariadne.types import ContextValue, ErrorFormatter, GraphQLResult, RootValue
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import (
-    HttpRequest,
-    HttpResponse,
-    HttpResponseBadRequest,
-    HttpResponseForbidden,
-)
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View

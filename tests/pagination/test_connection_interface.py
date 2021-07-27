@@ -14,10 +14,7 @@ config = apps.get_app_config("graph_loader")
 class SomethingResolver(RelayModelMixin, GenericModelResolver):
     model = Something
     queryset = Something.objects.all()
-    ordering = (
-        "id",
-        "name",
-    )
+    ordering = ("id", "name")
 
 
 @pytest.mark.django_db
@@ -41,9 +38,7 @@ def test_connection_interface(mocker):
 
     query.set_field("things", SomethingResolver.as_resolver(method="list"))
 
-    resolvers = [
-        query,
-    ]
+    resolvers = [query]
 
     schema = make_executable_schema(
         config.type_defs + [type_defs], config.all_app_types + resolvers

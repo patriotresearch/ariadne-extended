@@ -17,17 +17,11 @@ from django.test.signals import setting_changed
 from django.utils.module_loading import import_string
 
 
-DEFAULTS = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "ariadne_extended.permissions.AllowAny",
-    ],
-}
+DEFAULTS = {"DEFAULT_PERMISSION_CLASSES": ["ariadne_extended.permissions.AllowAny"]}
 
 
 # List of settings that may be in string import notation.
-IMPORT_STRINGS = [
-    "DEFAULT_PERMISSION_CLASSES",
-]
+IMPORT_STRINGS = ["DEFAULT_PERMISSION_CLASSES"]
 
 
 # List of settings that have been removed

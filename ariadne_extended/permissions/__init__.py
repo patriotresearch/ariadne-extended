@@ -53,13 +53,15 @@ class AND:
         self.op1 = op1
         self.op2 = op2
 
-    def has_permission(self, request, view):
-        return self.op1.has_permission(request, view) and self.op2.has_permission(request, view)
+    def has_permission(self, request, resolver):
+        return self.op1.has_permission(request, resolver) and self.op2.has_permission(
+            request, resolver
+        )
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, resolver, obj):
         return self.op1.has_object_permission(
-            request, view, obj
-        ) and self.op2.has_object_permission(request, view, obj)
+            request, resolver, obj
+        ) and self.op2.has_object_permission(request, resolver, obj)
 
 
 class OR:
@@ -67,24 +69,26 @@ class OR:
         self.op1 = op1
         self.op2 = op2
 
-    def has_permission(self, request, view):
-        return self.op1.has_permission(request, view) or self.op2.has_permission(request, view)
+    def has_permission(self, request, resolver):
+        return self.op1.has_permission(request, resolver) or self.op2.has_permission(
+            request, resolver
+        )
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, resolver, obj):
         return self.op1.has_object_permission(
-            request, view, obj
-        ) or self.op2.has_object_permission(request, view, obj)
+            request, resolver, obj
+        ) or self.op2.has_object_permission(request, resolver, obj)
 
 
 class NOT:
     def __init__(self, op1):
         self.op1 = op1
 
-    def has_permission(self, request, view):
-        return not self.op1.has_permission(request, view)
+    def has_permission(self, request, resolver):
+        return not self.op1.has_permission(request, resolver)
 
-    def has_object_permission(self, request, view, obj):
-        return not self.op1.has_object_permission(request, view, obj)
+    def has_object_permission(self, request, resolver, obj):
+        return not self.op1.has_object_permission(request, resolver, obj)
 
 
 class BasePermissionMetaclass(OperationHolderMixin, type):
@@ -96,13 +100,13 @@ class BasePermission(metaclass=BasePermissionMetaclass):
     A base class from which all permission classes should inherit.
     """
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, resolver):
         """
         Return `True` if permission is granted, `False` otherwise.
         """
         return True
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, resolver, obj):
         """
         Return `True` if permission is granted, `False` otherwise.
         """
@@ -117,7 +121,7 @@ class AllowAny(BasePermission):
     more explicit.
     """
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, resolver):
         return True
 
 
@@ -126,7 +130,7 @@ class IsAuthenticated(BasePermission):
     Allows access only to authenticated users.
     """
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, resolver):
         return bool(request.user and request.user.is_authenticated)
 
 
@@ -135,5 +139,5 @@ class IsAdminUser(BasePermission):
     Allows access only to admin users.
     """
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, resolver):
         return bool(request.user and request.user.is_staff)

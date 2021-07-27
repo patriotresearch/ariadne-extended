@@ -140,7 +140,7 @@ latex_documents = [
         "Ariadne Extended Documentation",
         "Patrick Forringer",
         "manual",
-    ),
+    )
 ]
 
 
@@ -165,5 +165,5 @@ texinfo_documents = [
         "ariadne_extended",
         "Additional modules for working with Ariadne and Django",
         "Miscellaneous",
-    ),
+    )
 ]

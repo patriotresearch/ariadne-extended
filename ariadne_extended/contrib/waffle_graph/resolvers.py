@@ -1,4 +1,5 @@
 from ariadne_extended.resolvers import ListModelResolver, Resolver, DetailModelMixin
+from ariadne_extended.permissions import AllowAny
 from waffle import get_waffle_flag_model
 from waffle.models import Sample, Switch
 from waffle.utils import get_setting
@@ -7,12 +8,24 @@ from .types import query, waffle_item_interface, waffle_type
 
 
 class WaffleResolver(DetailModelMixin, ListModelResolver):
+    """
+    Base resolver for waffle models, allows all users to resolve as the data is not sensitive
+    and may even be resolved by users that aren't logged in.
+    """
+
     lookup_arg = "name"
     lookup_field = "name"
+    permission_classes = [AllowAny]
 
     def get_object(self):
+        """
+        Use the get method provided by the django-waffle library to lookup a flag/switch/sample
+
+        Waffle models don't require object level permissions
+
+        Returns an empty model class if not found with the used lookup name
+        """
         lookup = self.get_lookup_filter_kwargs()
-        # Waffle model get returns an empty class if not found with the used lookup name
         return self.model.get(**lookup)
 
     def get_queryset(self):
