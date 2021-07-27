@@ -16,3 +16,7 @@ class PermissionDenied(ResolverException):
 
 class Throttled(ResolverException):
     pass
+
+
+class ResolverMethodNotFound(ResolverException):
+    pass

@@ -1,8 +1,9 @@
+from ariadne_extended.resolvers.model import GenericModelResolver
 from enum import Enum
 from unittest.mock import patch
 
 from ariadne_extended.resolvers import ListModelResolver, ModelResolver, Resolver
-from ariadne_extended.resolvers.mixins import InputMixin
+from ariadne_extended.resolvers.mixins import InputMixin, RetrieveModelMixin
 
 
 class ChildResolver(Resolver):
@@ -26,18 +27,15 @@ def test_input_mixin_get_input_arg():
     assert arg == "another_input"
 
 
-# def test_enum_thing?
-
-
 @patch("ariadne_extended.resolvers.ListModelResolver.initial")
 @patch("ariadne_extended.resolvers.ListModelResolver.list")
 def test_resolve_uses_proper_method(mock_list, mock_initial):
     mock_list.return_value = "handler called"
-    resolver = ListModelResolver(None, None)
+    resolver = ListModelResolver("parent", "info")
     resolver.config = {"method": "list"}
 
-    fn = resolver.resolve(None)
-    mock_initial.assert_called()
+    fn = resolver.resolve("resolve_parent")
+    mock_initial.assert_called_once_with()
 
     assert fn == "handler called"
 
@@ -46,11 +44,11 @@ def test_resolve_uses_proper_method(mock_list, mock_initial):
 @patch("ariadne_extended.resolvers.ModelResolver.retrieve")
 def test_resolve_uses_retrieve_by_default(mock_retrieve, mock_initial):
     mock_retrieve.return_value = "handler called"
-    resolver = ModelResolver(None, None)
+    resolver = ModelResolver("parent", "info")
     resolver.config = {}
 
-    fn = resolver.resolve(None)
-    mock_initial.assert_called()
+    fn = resolver.resolve("resolve_parent")
+    mock_initial.assert_called_once_with()
 
     assert fn == "handler called"
 
@@ -83,3 +81,19 @@ class TestInputMixin:
         result = im.get_input_data()
 
         assert result == [1, 2, 3]
+
+
+@patch("ariadne_extended.resolvers.model.GenericModelResolver.get_object")
+def test_retrieve_model_mixin(mock_get_object):
+    mock_get_object.return_value = "A model"
+
+    class Mixin(RetrieveModelMixin, GenericModelResolver):
+        queryset = "Unused"
+
+    detail_resolver = Mixin("parent", "info", id=123)
+    returned = detail_resolver.retrieve(None)
+
+    # Nothing passed into get_object
+    mock_get_object.assert_called_once_with()
+    # retrieve just returns what get_object returns
+    assert returned == "A model"

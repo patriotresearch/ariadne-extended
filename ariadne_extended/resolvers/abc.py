@@ -12,7 +12,7 @@ class Resolver:
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES
     throttle_classes = []
     authentication_classes = []
-    default_method = "retrieve"
+    default_method = None
 
     def __init__(self, parent, info, *operation_args, config=dict(), **operation_kwargs):
         # config is used for this specific operation on the resolver
@@ -54,12 +54,17 @@ class Resolver:
         self.initial(self.request, *args, **kwargs)
 
         method = self.config.get("method", self.default_method)
-        handler = getattr(self, method)
+        assert method is not None
         try:
+            handler = getattr(self, method)
             return handler(parent, *args, **kwargs)
         except exceptions.ResolverException:
             # TODO: tac on graphql errors?
             return None
+        except AttributeError:
+            raise exceptions.ResolverMethodNotFound(
+                "%s not found on %s", method, self.__class__.__name__
+            )
 
     def get_operation_args(self):
         return self._operation_args

@@ -4,7 +4,6 @@ Mixins that are in DRF serializers and resolver data
 import enum
 
 from django.db.models.deletion import IntegrityError, ProtectedError
-from . import exceptions
 
 
 class ListModelMixin:
@@ -92,65 +91,16 @@ class CreateModelMixin(InputMixin):
         return serializer.save()
 
 
-class DetailModelMixin:
-    lookup_arg = None
-    lookup_field = "id"
+class RetrieveModelMixin:
+    """
+    Retrieve a model instance
+    """
 
-    def get_lookup_arg(self):
-        return self.config.get("lookup_arg", self.lookup_arg)
-
-    def get_lookup_field(self):
-        return self.config.get("lookup_field", self.lookup_field)
-
-    def get_lookup_operation_data(self):
-        if self.config.get("reference", False):
-            return self.reference_kwargs
-        return self.operation_kwargs
-
-    def get_lookup_filter_kwargs(self):
-        # Perform the lookup filtering.
-        lookup_arg = self.get_lookup_arg() or self.get_lookup_field()
-
-        operation_data = self.get_lookup_operation_data()
-
-        assert lookup_arg in operation_data, (
-            "Expected resolver %s to be called with an argument "
-            'named "%s". Fix your query arguments, or set the `.lookup_field` '
-            "attribute on the resolver correctly." % (self.__class__.__name__, lookup_arg)
-        )
-        return {self.get_lookup_field(): operation_data[lookup_arg]}
-
-    def get_object(self):
-        """
-        Returns a singular object as configured by the resolver
-
-        You may want to override this if you need to provide non-standard
-        queryset lookups. Eg if objects are referenced using multiple
-        arguments.
-        """
-        queryset = self.get_queryset()
-
-        filter_kwargs = self.get_lookup_filter_kwargs()
-
-        try:
-            obj = queryset.get(**filter_kwargs)
-        except queryset.model.DoesNotExist:
-            raise exceptions.NotFoundException()
-
-        # TODO: handle no object found for field, raise exception that always is caught and returns null for field?
-
-        # May raise a permission denied
-        if obj:
-            self.check_object_permissions(self.request, obj)
-
-        return obj
-
-    # TODO: move out into its own mixin?
     def retrieve(self, parent, *args, **kwargs):
         return self.get_object()
 
 
-class UpdateModelMixin(InputMixin, DetailModelMixin):
+class UpdateModelMixin(InputMixin):
     """
     Update a model instance.
     """
@@ -182,7 +132,7 @@ class UpdateModelMixin(InputMixin, DetailModelMixin):
         return self.update(request, *args, **kwargs)
 
 
-class DestroyModelMixin(DetailModelMixin):
+class DestroyModelMixin:
     """
     Destroy a model instance.
     """

@@ -4,7 +4,7 @@ from .mixins import (
     ListModelMixin,
     InputMixin,
     CreateModelMixin,
-    DetailModelMixin,
+    RetrieveModelMixin,
     UpdateModelMixin,
     DestroyModelMixin,
 )
