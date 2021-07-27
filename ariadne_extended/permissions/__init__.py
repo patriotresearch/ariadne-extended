@@ -19,6 +19,12 @@ class OperationHolderMixin:
     def __invert__(self):
         return SingleOperandHolder(NOT, self)
 
+    def __eq__(self, other) -> bool:
+        if hasattr(self, "op2_class"):
+            return self.op1_class is other.op1_class and self.op2_class is other.op2_class
+        else:
+            return self.op1_class is other.op1_class
+
 
 class SingleOperandHolder(OperationHolderMixin):
     def __init__(self, operator_class, op1_class):
