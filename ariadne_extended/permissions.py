@@ -20,6 +20,8 @@ class OperationHolderMixin:
         return SingleOperandHolder(NOT, self)
 
     def __eq__(self, other) -> bool:
+        if not hasattr(self, "op1_class"):
+            return self is other
         if hasattr(self, "op2_class"):
             return self.op1_class is other.op1_class and self.op2_class is other.op2_class
         else:
