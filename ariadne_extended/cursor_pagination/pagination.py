@@ -3,10 +3,10 @@ From django-cursor-pagination==0.1.4
 updated to remove dependency on six
 """
 from base64 import b64decode, b64encode
-from collections import Sequence
+from collections.abc import Sequence
 
 from django.db.models import Field, Func, Value, TextField
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 class TupleField(Field):

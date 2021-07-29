@@ -3,12 +3,7 @@ from django.db import models
 
 from ..filters import FilterMixin
 from .abc import Resolver
-from .mixins import (
-    CreateModelMixin,
-    DestroyModelMixin,
-    ListModelMixin,
-    UpdateModelMixin,
-)
+from .mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin, UpdateModelMixin
 
 
 class GenericModelResolver(Resolver):

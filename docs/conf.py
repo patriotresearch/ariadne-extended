@@ -64,7 +64,7 @@ author = "Patrick Forringer, Buddy Lindsey"
 # the built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = "0.2.3"
+release = "0.2.4"
 # The short X.Y.Z version.
 version = re.match(r"^([0-9]+\.){2}[0-9]+", release).group(0)
 
@@ -140,7 +140,7 @@ latex_documents = [
         "Ariadne Extended Documentation",
         "Patrick Forringer",
         "manual",
-    ),
+    )
 ]
 
 
@@ -165,5 +165,5 @@ texinfo_documents = [
         "ariadne_extended",
         "Additional modules for working with Ariadne and Django",
         "Miscellaneous",
-    ),
+    )
 ]
