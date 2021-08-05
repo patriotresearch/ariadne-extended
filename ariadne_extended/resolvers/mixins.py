@@ -135,7 +135,7 @@ class DetailModelMixin:
         try:
             obj = queryset.get(**filter_kwargs)
         except queryset.model.DoesNotExist:
-            raise exceptions.NotFoundException()
+            raise exceptions.NotFoundException("Object not found", info=self.info, resolver=self)
 
         # TODO: handle no object found for field, raise exception that always is caught and returns null for field?
 

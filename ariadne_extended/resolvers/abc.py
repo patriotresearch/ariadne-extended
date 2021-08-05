@@ -35,6 +35,9 @@ class Resolver:
         # normalize federation reference args from ariadne
         self.reference_kwargs = self.get_reference_kwargs()
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__} config:{repr(self.config)} op_args:{repr(self._operation_args)} op_kwargs:{repr(self._operation_kwargs)}"
+
     def get_request(self, info):
         context = getattr(info, "context", {})
         return context.get("request", None)
@@ -57,7 +60,7 @@ class Resolver:
         handler = getattr(self, method)
         try:
             return handler(parent, *args, **kwargs)
-        except exceptions.ResolverException:
+        except exceptions.ResolverException as e:
             # TODO: tac on graphql errors?
             return None
 
@@ -147,7 +150,7 @@ class Resolver:
         """
         If resolution is not permitted, determine what kind of exception to raise.
         """
-        raise exceptions.PermissionDenied(message)
+        raise exceptions.PermissionDenied(message, info=self.info, resolver=self)
 
     def check_object_permissions(self, request, obj):
         """
@@ -218,4 +221,4 @@ class Resolver:
         """
         If request is throttled, determine what kind of exception to raise.
         """
-        raise exceptions.Throttled(wait)
+        raise exceptions.Throttled(wait, info=self.info, resolver=self)

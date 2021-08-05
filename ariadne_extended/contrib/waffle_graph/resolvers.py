@@ -51,6 +51,8 @@ class AllWaffleTypesResolver(Resolver):
 
 
 class ActiveResolver(Resolver):
+    permission_classes = [AllowAny]
+
     def check(self, parent, *args, **kwargs):
         try:
             return parent.is_active(self.request)
