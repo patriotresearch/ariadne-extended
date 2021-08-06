@@ -1,8 +1,6 @@
 from copy import copy
 
 import humps.main as humps
-from ariadne import FallbackResolversSetter
-from graphql.type import GraphQLList, GraphQLField
 from .types import error_detail, payload
 from rest_framework.exceptions import ErrorDetail
 
@@ -14,10 +12,9 @@ def resolve_error_detail_error(parent, info, *args, **kwargs):
 
 
 def traverse_errors(fields, node, stack=""):
-
     # Does the list contain errors or more fields?
     if isinstance(node, list):
-        if any([isinstance(i, ErrorDetail) for i in node]):
+        if any(isinstance(i, ErrorDetail) for i in node):
             stack_key = copy(stack)
             fields.append(dict(name=humps.camelize(stack_key), values=node))
         else:
@@ -32,7 +29,7 @@ def traverse_errors(fields, node, stack=""):
     # If node is a dict, use the keys
     if isinstance(node, dict):
         for name, errors in node.items():
-            # Copy key so the ref is lost and the chain becomes unique
+            # Copy key so the ref is lost and the stack becomes unique
             stack_key = copy(stack)
             if bool(stack_key):
                 if isinstance(name, int):

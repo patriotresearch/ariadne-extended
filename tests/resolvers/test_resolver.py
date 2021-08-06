@@ -1,10 +1,34 @@
-from unittest.mock import Mock, patch
-
 import pytest
-from ariadne import QueryType, make_executable_schema
+from unittest.mock import patch
+
+from ariadne import QueryType, make_executable_schema, graphql_sync
 from ariadne_extended.resolvers import Resolver
 from glom import glom
-from graphql import graphql_sync
+from graphql import GraphQLResolveInfo
+
+from ariadne_extended.permissions import AllowAny
+
+
+@pytest.fixture
+def info_fixture():
+    # request = kwargs.pop("request", None)
+    request = "request"
+    info_config = dict(
+        field_name="name",
+        field_nodes=[],
+        return_type="GraphQLOutputType",
+        parent_type="GraphQLObjectType",
+        path="",
+        schema="GraphQLSchema",
+        fragments=dict(),
+        root_value=dict(),
+        operation=None,
+        variable_values=None,
+        context=dict(request=request),
+        is_awaitable=False,
+    )
+    # info_config.update(kwargs)
+    return GraphQLResolveInfo(**info_config)
 
 
 def test_resolver_e2e():
@@ -32,9 +56,10 @@ def test_resolver_e2e():
     resolvers = [query]
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql_sync(
+    _, result = graphql_sync(
         schema,
-        """
+        dict(
+            query="""
             query {
                 thing: getThing(someArg: "This Way") {
                     id
@@ -43,13 +68,16 @@ def test_resolver_e2e():
                     comes
                 }
             }
-        """,
+        """
+        ),
+        context_value=dict(request="request"),
     )
-    assert result.errors is None
-    assert glom(result.data, "thing.id") == "123"
-    assert glom(result.data, "thing.name") == "Something named"
-    assert glom(result.data, "thing.additional") == "This Way"
-    assert glom(result.data, "thing.comes") == True
+
+    assert result.get("errors", None) is None
+    assert glom(result["data"], "thing.id") == "123"
+    assert glom(result["data"], "thing.name") == "Something named"
+    assert glom(result["data"], "thing.additional") == "This Way"
+    assert glom(result["data"], "thing.comes") is True
 
 
 class ChildResolver(Resolver):
@@ -63,7 +91,7 @@ class ChildResolver(Resolver):
 
 
 def test_attrs():
-    assert Resolver.permission_classes == []
+    assert Resolver.permission_classes == [AllowAny]
     assert Resolver.throttle_classes == []
     assert Resolver.authentication_classes == []
     assert Resolver.default_method == "retrieve"
@@ -73,17 +101,16 @@ def test_attrs():
 @patch("ariadne_extended.resolvers.Resolver.get_operation_kwargs")
 @patch("ariadne_extended.resolvers.Resolver.get_reference_kwargs")
 def test_resolver_initial_args(
-    mock_get_reference_kwargs, mock_get_operation_kwargs, mock_get_operation_args
+    mock_get_reference_kwargs, mock_get_operation_kwargs, mock_get_operation_args, info_fixture
 ):
     mock_get_operation_args.return_value = "translated_args"
     mock_get_operation_kwargs.return_value = "translated_kwargs"
     mock_get_reference_kwargs.return_value = "translated_ref_kwargs"
     parent = "parent_obj"
-    info = "info_obj"
 
     resolver = ChildResolver(
         parent,
-        info,
+        info_fixture,
         {"operation": "args"},
         True,
         config=dict(test="config"),
@@ -92,8 +119,8 @@ def test_resolver_initial_args(
 
     mock_get_operation_kwargs.assert_called()
 
-    assert resolver.info == info
-    assert resolver.request == info
+    assert resolver.info == info_fixture
+    assert resolver.request == "request"
     assert resolver.parent == parent
     assert resolver.config == dict(test="config")
     assert resolver._operation_args == (dict(operation="args"), True)
@@ -103,7 +130,7 @@ def test_resolver_initial_args(
     assert resolver.reference_kwargs == "translated_ref_kwargs"
 
 
-def test_initial(mocker):
+def test_initial(mocker, info_fixture):
     """
     Initial method gets passed handler args and kwargs and checks different
     """
@@ -111,40 +138,51 @@ def test_initial(mocker):
     mock_check_permissions = mocker.patch("ariadne_extended.resolvers.Resolver.check_permissions")
     mock_check_throttles = mocker.patch("ariadne_extended.resolvers.Resolver.check_throttles")
 
-    resolver_instance = ChildResolver("parent", "init_info_obj")
-    assert resolver_instance.initial("info_obj", "additional_arg", some_kwargs=True) == None
+    resolver_instance = ChildResolver("parent", info_fixture)
 
-    mock_perf_auth.assert_called_with("info_obj")
-    mock_check_permissions.assert_called_with("info_obj")
-    mock_check_throttles.assert_called_with("info_obj")
+    assert (
+        resolver_instance.initial(
+            info_fixture.context["request"], "additional_arg", some_kwargs=True
+        )
+        is None
+    )
+    mock_perf_auth.assert_called_with(info_fixture.context["request"])
+    mock_check_permissions.assert_called_with(info_fixture.context["request"])
+    mock_check_throttles.assert_called_with(info_fixture.context["request"])
 
 
-def test_resolve(mocker):
+def test_resolve(mocker, info_fixture):
     """
     Uses configuration resolver handler method if present
     """
     mock_initial = mocker.patch("ariadne_extended.resolvers.Resolver.initial")
     method_spy = mocker.spy(ChildResolver, "stub_resolve_method")
+
     resolver_instance = ChildResolver(
-        "parent", "init_info_obj", config=dict(method="stub_resolve_method")
+        "parent", info_fixture, config=dict(method="stub_resolve_method")
     )
 
     resolver_instance.resolve("parent", "additional_arg", some_kwargs=True)
-    mock_initial.assert_called_with("init_info_obj", "additional_arg", some_kwargs=True)
+    mock_initial.assert_called_with(
+        info_fixture.context["request"], "additional_arg", some_kwargs=True
+    )
     method_spy.assert_called_with(resolver_instance, "parent", "additional_arg", some_kwargs=True)
 
 
-def test_resolve_default(mocker):
+def test_resolve_default(mocker, info_fixture):
     """
     Falls back on default resolver handler method if none specified
     """
     mock_initial = mocker.patch("ariadne_extended.resolvers.Resolver.initial")
     method_spy = mocker.spy(ChildResolver, "new_default_method")
     stub_method_spy = mocker.spy(ChildResolver, "stub_resolve_method")
-    resolver_instance = ChildResolver("parent", "init_info_obj")
 
+    resolver_instance = ChildResolver("parent", info_fixture)
     resolver_instance.resolve("parent", "additional_arg", some_kwargs=True)
-    mock_initial.assert_called_with("init_info_obj", "additional_arg", some_kwargs=True)
+
+    mock_initial.assert_called_with(
+        info_fixture.context["request"], "additional_arg", some_kwargs=True
+    )
     method_spy.assert_called_with(resolver_instance, "parent", "additional_arg", some_kwargs=True)
     stub_method_spy.assert_not_called()
 
@@ -185,7 +223,7 @@ def test_as_nested_resolver(mock_as_resolver):
     """
     Calls `as_resolver` with nested config kwarg
     """
-    resolver = ChildResolver.as_nested_resolver(additional_kwargs=True)
+    ChildResolver.as_nested_resolver(additional_kwargs=True)
     mock_as_resolver.assert_called_with(nested=True, additional_kwargs=True)
 
 
@@ -194,7 +232,7 @@ def test_as_reference_resolver(mock_as_resolver):
     """
     Calls `as_resolver` with reference config kwarg
     """
-    resolver = ChildResolver.as_reference_resolver(additional_kwargs=True)
+    ChildResolver.as_reference_resolver(additional_kwargs=True)
     mock_as_resolver.assert_called_with(reference=True, additional_kwargs=True)
 
 

@@ -3,49 +3,66 @@ from functools import update_wrapper
 import humps.main as humps
 from django.utils.decorators import classonlymethod
 
+from ariadne_extended.settings import api_settings
+
 from . import exceptions
 
 
 class Resolver:
-
-    permission_classes = []
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES
     throttle_classes = []
     authentication_classes = []
     default_method = "retrieve"
 
     def __init__(self, parent, info, *operation_args, config=dict(), **operation_kwargs):
-        # arguments used for this specific operation on the resolver
+        # config is used for this specific operation on the resolver
         self.config = config.copy()
-        self._operation_args = operation_args
-        self._operation_kwargs = operation_kwargs
-        self.operation_args = self.get_operation_args()
-        self.operation_kwargs = self.get_operation_kwargs()
-        # normalize federation reference args from ariadne
-        self.reference_kwargs = self.get_reference_kwargs()
+        # Graphql info object stored for access
+        self.info = info
+        # Get request from graphql info by default
+        self.request = self.get_request(info)
+        # Store parent for access
         self.parent = parent
 
-        # TODO: info may have to be wrapped in a Request compat object to work with
-        # permissions and filtering.
-        self.info = info
-        self.request = info
+        # Store unprocessed resolver args and kwargs
+        self._operation_args = operation_args
+        self._operation_kwargs = operation_kwargs
 
-    def initial(self, info, *args, **kwargs):
+        # process resolver args and kwargs if needed
+        self.operation_args = self.get_operation_args()
+        self.operation_kwargs = self.get_operation_kwargs()
+
+        # normalize federation reference args from ariadne
+        self.reference_kwargs = self.get_reference_kwargs()
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__} config:{repr(self.config)} op_args:{repr(self._operation_args)} op_kwargs:{repr(self._operation_kwargs)}"
+
+    def get_request(self, info):
+        context = getattr(info, "context", {})
+        return context.get("request", None)
+
+    def initial(self, request, *args, **kwargs):
         """
         Runs anything that needs to occur prior to calling the operation handler
         """
-        self.perform_authentication(info)
-        self.check_permissions(info)
-        self.check_throttles(info)
+        self.perform_authentication(request)
+        self.check_permissions(request)
+        self.check_throttles(request)
 
     def resolve(self, parent, *args, **kwargs):
         """
         Run initial checks, then call the default or configured operation resolve handler
         """
-        self.initial(self.info, *args, **kwargs)
+        self.initial(self.request, *args, **kwargs)
 
         method = self.config.get("method", self.default_method)
         handler = getattr(self, method)
-        return handler(parent, *args, **kwargs)
+        try:
+            return handler(parent, *args, **kwargs)
+        except exceptions.ResolverException as e:
+            # TODO: tac on graphql errors?
+            return None
 
     def get_operation_args(self):
         return self._operation_args
@@ -58,7 +75,7 @@ class Resolver:
 
     def get_reference_kwargs(self):
         if self.config.get("reference", False):
-            return humps.decamelize(self.operation_args[0])
+            return humps.decamelize(self.parent)
         else:
             return dict()
 
@@ -92,7 +109,7 @@ class Resolver:
         """
         Extra context provided to the serializer class.
         """
-        return {"request": self.info, "format": None, "view": self}
+        return {"request": self.request, "format": None, "view": self}
 
     @classonlymethod
     def as_resolver(cls, **resolver_config):
@@ -118,39 +135,42 @@ class Resolver:
         from the orm when used inside a GenericModelResolver
         """
         resolver_config["nested"] = True
-        resolver = cls.as_resolver(**resolver_config)
-        return resolver
+        return cls.as_resolver(**resolver_config)
 
     @classonlymethod
     def as_reference_resolver(cls, **resolver_config):
+        """
+        When resolving via reference this enables the resolver to grab the correct reference
+        parameters from ariadne and utilize them in subsequent object lookups.
+        """
         resolver_config["reference"] = True
-        resolver = cls.as_resolver(**resolver_config)
-        return resolver
+        return cls.as_resolver(**resolver_config)
 
-    def permission_denied(self, info, message=None):
+    def permission_denied(self, request, message=None):
         """
         If resolution is not permitted, determine what kind of exception to raise.
         """
-        raise exceptions.PermissionDenied(message)
+        raise exceptions.PermissionDenied(message, info=self.info, resolver=self)
 
-    def check_object_permissions(self, info, obj):
+    def check_object_permissions(self, request, obj):
         """
         Check if the resolution should be permitted for a given object.
         Raises an appropriate exception if the request is not permitted.
         """
         for permission in self.get_permissions():
-            if not permission.has_object_permission(info, self, obj):
-                self.permission_denied(info, message=getattr(permission, "message", None))
+            if not permission.has_object_permission(request, self, obj):
+                self.permission_denied(request, message=getattr(permission, "message", None))
 
-    def check_throttles(self, info):
+    def check_throttles(self, request):
         """
         Check if resolution should be throttled.
         Raises an appropriate exception if the resolution is throttled.
         """
-        throttle_durations = []
-        for throttle in self.get_throttles():
-            if not throttle.allow_request(info, self):
-                throttle_durations.append(throttle.wait())
+        throttle_durations = [
+            throttle.wait()
+            for throttle in self.get_throttles()
+            if not throttle.allow_request(request, self)
+        ]
 
         if throttle_durations:
             # Filter out `None` values which may happen in case of config / rate
@@ -158,9 +178,9 @@ class Resolver:
             durations = [duration for duration in throttle_durations if duration is not None]
 
             duration = max(durations, default=None)
-            self.throttled(request, duration)
+            self.throttled(self.request, duration)
 
-    def perform_authentication(self, info):
+    def perform_authentication(self, request):
         """
         Perform authentication on the incoming resolution.
 
@@ -170,14 +190,14 @@ class Resolver:
         """
         pass
 
-    def check_permissions(self, info):
+    def check_permissions(self, request):
         """
         Check if the resolution should be permitted.
         Raises an appropriate exception if the resolution is not permitted.
         """
         for permission in self.get_permissions():
-            if not permission.has_permission(info, self):
-                self.permission_denied(info, message=getattr(permission, "message", None))
+            if not permission.has_permission(request, self):
+                self.permission_denied(request, message=getattr(permission, "message", None))
 
     def get_authenticators(self):
         """
@@ -201,4 +221,4 @@ class Resolver:
         """
         If request is throttled, determine what kind of exception to raise.
         """
-        raise exceptions.Throttled(wait)
+        raise exceptions.Throttled(wait, info=self.info, resolver=self)

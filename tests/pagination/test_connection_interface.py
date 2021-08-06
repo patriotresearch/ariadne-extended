@@ -1,31 +1,24 @@
-from enum import Enum
-
 import pytest
-from ariadne import EnumType, QueryType, make_executable_schema
+from ariadne import QueryType, make_executable_schema
 from ariadne_extended.cursor_pagination import RelayModelMixin
 from ariadne_extended.resolvers.model import GenericModelResolver
-from graphql import graphql_sync
 from django.apps import apps
+from tests.utils import run_graphql
 from model_bakery import baker
 
+from .models import Something
 
 config = apps.get_app_config("graph_loader")
-
-
-from .models import Something
 
 
 class SomethingResolver(RelayModelMixin, GenericModelResolver):
     model = Something
     queryset = Something.objects.all()
-    ordering = (
-        "id",
-        "name",
-    )
+    ordering = ("id", "name")
 
 
 @pytest.mark.django_db
-def test_enum_input_value_resolution(mocker):
+def test_connection_interface(mocker):
 
     type_defs = """
         type Something implements Node {
@@ -45,9 +38,7 @@ def test_enum_input_value_resolution(mocker):
 
     query.set_field("things", SomethingResolver.as_resolver(method="list"))
 
-    resolvers = [
-        query,
-    ]
+    resolvers = [query]
 
     schema = make_executable_schema(
         config.type_defs + [type_defs], config.all_app_types + resolvers
@@ -56,9 +47,10 @@ def test_enum_input_value_resolution(mocker):
     for i in range(20):
         baker.make(Something, name="st%s" % i)
 
-    result = graphql_sync(
+    result = run_graphql(
         schema,
-        """
+        dict(
+            query="""
             query {
                 things(first: 5) {
                     pageInfo {
@@ -79,10 +71,11 @@ def test_enum_input_value_resolution(mocker):
                     }
                 }
             }
-        """,
+        """
+        ),
     )
-    assert result.errors is None
-    assert result.data == dict(
+    assert result.get("errors", None) is None
+    assert result.get("data", {}) == dict(
         things=dict(
             pageInfo=dict(
                 hasNextPage=True,

@@ -20,10 +20,17 @@
 import os
 import re
 import sys
+import django
 
 sys.path.insert(0, os.path.abspath(".."))
 
 import ariadne_extended
+
+# from django.conf import settings
+# from tests import settings as test_settings
+# settings.configure(test_settings)
+os.environ["DJANGO_SETTINGS_MODULE"] = "tests.settings"
+django.setup()
 
 # -- General configuration ---------------------------------------------
 
@@ -41,8 +48,8 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = [".rst", ".md"]
+# source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "index"
@@ -57,7 +64,7 @@ author = "Patrick Forringer, Buddy Lindsey"
 # the built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = "0.1.12"
+release = "0.2.5"
 # The short X.Y.Z version.
 version = re.match(r"^([0-9]+\.){2}[0-9]+", release).group(0)
 
@@ -85,7 +92,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
@@ -96,7 +103,8 @@ html_theme = "alabaster"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
+html_static_path = []
 
 
 # -- Options for HTMLHelp output ---------------------------------------
@@ -132,7 +140,7 @@ latex_documents = [
         "Ariadne Extended Documentation",
         "Patrick Forringer",
         "manual",
-    ),
+    )
 ]
 
 
@@ -155,7 +163,7 @@ texinfo_documents = [
         "Ariadne Extended Documentation",
         author,
         "ariadne_extended",
-        "One line description of project.",
+        "Additional modules for working with Ariadne and Django",
         "Miscellaneous",
-    ),
+    )
 ]

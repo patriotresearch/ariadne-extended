@@ -1,17 +1,18 @@
-Welcome to Ariadne Extended's documentation!
-======================================
+Welcome to Ariadne Extended documentation!
+==========================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   readme
    installation
+   concepts
+   resolvers
    usage
-   modules
+   contrib/index
    contributing
    authors
-   history
+   utils
 
 Indices and tables
 ==================
