@@ -64,7 +64,7 @@ author = "Patrick Forringer, Buddy Lindsey"
 # the built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = "0.2.4"
+release = "0.2.5"
 # The short X.Y.Z version.
 version = re.match(r"^([0-9]+\.){2}[0-9]+", release).group(0)
 

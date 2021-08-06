@@ -2,7 +2,7 @@
 
 [tool.poetry]
 name = "ariadne-extended"
-version = "0.2.4"
+version = "0.2.5"
 description = "Ariadne contrib library for working with Django and GraphQL"
 authors = ["Patrick Forringer <pforringer@patriotrc.com>", "Buddy Lindsey <blindsey@patriotrc.com"]
 license = "MIT"
